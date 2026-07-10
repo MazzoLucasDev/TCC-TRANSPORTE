@@ -1,4 +1,4 @@
-import type { DomainError } from "./DomainError.js";
+import type { DomainError } from "../../shared/DomainError.js";
 
 export class InvalidNameError extends Error implements DomainError {
   constructor(name: string) {
