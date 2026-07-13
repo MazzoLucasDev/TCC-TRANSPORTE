@@ -20,6 +20,7 @@ export type VanProps = {
   destiny: Destiny;
   capacity: Capacity;
   driverId: string;
+  emTrajeto: boolean;
 };
 
 export type VanError =
@@ -60,6 +61,7 @@ export class Van {
         destiny: destinyOrError.value,
         capacity: capacityOrError.value,
         driverId: vanData.driverId,
+        emTrajeto: false,
       }),
     );
   }
@@ -90,8 +92,15 @@ export class Van {
   get driverId(): string {
     return this.props.driverId;
   }
+  get emTrajeto(): boolean {
+    return this.props.emTrajeto;
+  }
 
   temVagaDisponivel(quantidadeAtual: number): boolean {
     return quantidadeAtual < this.capacity.value;
+  }
+
+  alterarStatusTrajeto(emTrajeto: boolean): Van {
+    return new Van({ ...this.props, emTrajeto });
   }
 }

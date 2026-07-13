@@ -5,4 +5,5 @@ export interface VanData {
   destiny: string;
   capacity: number;
   driverId: string;
+  emTrajeto: boolean;
 }
