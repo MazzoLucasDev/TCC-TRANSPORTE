@@ -1,11 +1,14 @@
 import { left, right, type Either } from "../../shared/Either.js";
-import { InvalidCollectionPointError } from "../Errors/InvalidCollectionPointError.js";
+import { InvalidCollectionPointError } from "../erorrs/InvalidCollectionPointError.js";
 
 export type CollectionPointData = {
   lat: number;
   long: number;
 };
-
+const BRASIL_LAT_MIN = -33.75;
+const BRASIL_LAT_MAX = 5.27;
+const BRASIL_LNG_MIN = -73.99;
+const BRASIL_LNG_MAX = -28.84;
 export class CollectionPoint {
   private constructor(
     private readonly long: number,
@@ -30,14 +33,10 @@ export class CollectionPoint {
     if (Number.isNaN(lat) || Number.isNaN(long)) {
       return false;
     }
-    if (lat < -90 || lat > 90) {
+    if (lat < BRASIL_LAT_MIN || lat > BRASIL_LAT_MAX) {
       return false;
     }
-    if (long < -180 || long > 180) {
-      return false;
-    }
-
-    if (lat === 0 && long === 0) {
+    if (long < BRASIL_LNG_MIN || long > BRASIL_LNG_MAX) {
       return false;
     }
     return true;
