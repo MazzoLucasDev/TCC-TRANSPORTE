@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/DomainError.js";
+import type { DomainError } from "../../shared/errors/DomainError.js";
 
 export class InvalidPhoneError extends Error implements DomainError {
   constructor(phone: string) {

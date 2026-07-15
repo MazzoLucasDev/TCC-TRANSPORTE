@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/DomainError.js";
+import type { DomainError } from "../../shared/errors/DomainError.js";
 
 export class InvalidCollectionPointError extends Error implements DomainError {
   constructor(latitude: number, longitude: number) {

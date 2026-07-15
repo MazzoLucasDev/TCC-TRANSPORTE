@@ -1,5 +1,5 @@
 import { left, right, type Either } from "../../shared/Either.js";
-import { InvalidCollectionPointError } from "../erorrs/InvalidCollectionPointError.js";
+import { InvalidCollectionPointError } from "../errors/InvalidCollectionPointError.js";
 
 export type CollectionPointData = {
   lat: number;

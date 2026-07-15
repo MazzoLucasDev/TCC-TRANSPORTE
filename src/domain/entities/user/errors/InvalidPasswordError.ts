@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/DomainError.js";
+import type { DomainError } from "../../shared/errors/DomainError.js";
 
 export class InvalidPasswordError extends Error implements DomainError {
   constructor(pass: string) {
