@@ -53,11 +53,11 @@ export class Attendance {
   get status(): AttendanceStatus {
     return this.props.status;
   }
-  markAbsent(): Attendance {
+  markAsAbsent(): Attendance {
     return new Attendance({ ...this.props, status: "ABSENT" });
   }
 
-  markPresent(): Attendance {
+  markAsPresent(): Attendance {
     return new Attendance({ ...this.props, status: "PRESENT" });
   }
   isPresent(): boolean {

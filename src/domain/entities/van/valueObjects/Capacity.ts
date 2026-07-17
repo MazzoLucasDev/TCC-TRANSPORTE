@@ -13,12 +13,12 @@ export class Capacity {
     return right(new Capacity(capacity));
   }
 
-  static validate(capacity: number): boolean | string {
+  static validate(capacity: number): boolean {
     if (!Number.isInteger(capacity)) {
       return false;
     }
     if (capacity < 1 || capacity > 50) {
-      return "Capacidade deve ser entre 1 a 50.";
+      return false;
     }
     return true;
   }

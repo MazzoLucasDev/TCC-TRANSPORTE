@@ -15,7 +15,7 @@ export class Phone {
   }
 
   static validate(phone: string): boolean {
-    if (phone.length !== 10 && phone.length) return false;
+    if (phone.length !== 10 && phone.length !== 11) return false;
 
     const ddd = Number(phone.slice(0, 2));
 

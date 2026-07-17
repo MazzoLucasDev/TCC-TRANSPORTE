@@ -7,8 +7,9 @@ export class Password {
   }
 
   static create(pass: string): Either<InvalidPasswordError, Password> {
-    if (!Password.validate(pass)) {
-      return left(new InvalidPasswordError(pass));
+    const erro = Password.validate(pass);
+    if (erro) {
+      return left(new InvalidPasswordError(erro)); // passa a mensagem, não a senha crua
     }
     return right(new Password(pass));
   }

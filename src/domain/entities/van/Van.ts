@@ -96,7 +96,7 @@ export class Van {
     return this.props.emTrajeto;
   }
 
-  temVagaDisponivel(quantidadeAtual: number): boolean {
+  verificarCapacidade(quantidadeAtual: number): boolean {
     return quantidadeAtual < this.capacity.value;
   }
 
