@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../shared/Either.js";
+import { left, right, type Either } from "../../shared/Either.js";
 import type { InvalidCapacityError } from "./errors/InvalidCapacityError.js";
 import type { InvalidDestinyError } from "./errors/InvalidDestinyError.js";
 import type { InvalidModelError } from "./errors/InvalidModelError.js";

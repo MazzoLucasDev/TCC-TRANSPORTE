@@ -1,5 +1,5 @@
-import { left, right, type Either } from "../shared/Either.js";
-import { InvalidUserIdError } from "../shared/errors/InvalidUserIdError.js";
+import { left, right, type Either } from "../../shared/Either.js";
+import { InvalidUserIdError } from "../../shared/errors/InvalidUserIdError.js";
 import type { AttendanceData } from "./AttendanceData.js";
 import { InvalidAttendanceDateError } from "./errors/InvalidAttendanceError.js";
 

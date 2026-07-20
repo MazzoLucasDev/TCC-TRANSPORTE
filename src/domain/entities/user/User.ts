@@ -4,7 +4,7 @@ import { Password } from "./valueObjects/Password.js";
 import { Phone } from "./valueObjects/Phone.js";
 import { UserType } from "./valueObjects/UserType.js";
 import type { UserData } from "./UserData.js";
-import { left, right, type Either } from "../shared/Either.js";
+import { left, right, type Either } from "../../shared/Either.js";
 import type { InvalidNameError } from "./errors/InvalidNameError.js";
 import type { InvalidEmailError } from "./errors/InvalidEmailError.js";
 import type { InvalidPasswordError } from "./errors/InvalidPasswordError.js";

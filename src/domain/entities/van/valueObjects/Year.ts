@@ -1,4 +1,4 @@
-import { right, left, type Either } from "../../shared/Either.js";
+import { right, left, type Either } from "../../../shared/Either.js";
 import { InvalidYearError } from "../errors/InvalidYearError.js";
 
 const ANO_MINIMO = 1990;

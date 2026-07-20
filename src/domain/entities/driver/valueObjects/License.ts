@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../../shared/Either.js";
+import { left, right, type Either } from "../../../shared/Either.js";
 import { InvalidLicenseError } from "../errors/InvalidLicenseError.js";
 
 export class License {

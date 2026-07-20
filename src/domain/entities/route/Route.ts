@@ -1,4 +1,4 @@
-import { left, Right, right, type Either } from "../shared/Either.js";
+import { left, Right, right, type Either } from "../../shared/Either.js";
 import { InvalidRouteError } from "./errors/InvalidRouteError.js";
 
 export type RouteType = "SIMPLE" | "OPTIMIZED";

@@ -1,4 +1,4 @@
-import { right, left, type Either } from "../../shared/Either.js";
+import { right, left, type Either } from "../../../shared/Either.js";
 import { InvalidDestinyError } from "../errors/InvalidDestinyError.js";
 
 export class Destiny {

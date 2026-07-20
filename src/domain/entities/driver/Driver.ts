@@ -1,7 +1,7 @@
-import { left, right, type Either } from "../shared/Either.js";
-import type { InvalidDateOfBirthError } from "../shared/errors/InvalidDateOfBirthError.js";
-import { InvalidUserIdError } from "../shared/errors/InvalidUserIdError.js";
-import { DateOfBirth } from "../shared/valueObjects/DateOfBirth.js";
+import { left, right, type Either } from "../../shared/Either.js";
+import type { InvalidDateOfBirthError } from "../../shared/errors/InvalidDateOfBirthError.js";
+import { InvalidUserIdError } from "../../shared/errors/InvalidUserIdError.js";
+import { DateOfBirth } from "../../shared/valueObjects/DateOfBirth.js";
 import type { DriverData } from "./DriverData.js";
 import type { InvalidLicenseError } from "./errors/InvalidLicenseError.js";
 import { UnderAgeError } from "./errors/UnderAgeDriverError.js";

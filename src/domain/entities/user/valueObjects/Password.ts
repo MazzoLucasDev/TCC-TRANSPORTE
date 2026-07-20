@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../../shared/Either.js";
+import { left, right, type Either } from "../../../shared/Either.js";
 import { InvalidPasswordError } from "../errors/InvalidPasswordError.js";
 
 export class Password {

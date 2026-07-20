@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/errors/DomainError.js";
+import type { DomainError } from "../../../shared/errors/DomainError.js";
 
 export class InvalidEmailError extends Error implements DomainError {
   constructor(email: string) {

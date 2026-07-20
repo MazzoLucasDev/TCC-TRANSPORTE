@@ -1,4 +1,4 @@
-import { right, left, type Either } from "../../shared/Either.js";
+import { right, left, type Either } from "../../../shared/Either.js";
 import { InvalidCapacityError } from "../errors/InvalidCapacityError.js";
 
 export class Capacity {

@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/errors/DomainError.js";
+import type { DomainError } from "../../../shared/errors/DomainError.js";
 
 export class InvalidAttendanceDateError extends Error implements DomainError {
   constructor(date: string) {

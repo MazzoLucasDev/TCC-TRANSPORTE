@@ -1,10 +1,10 @@
-import { left, right, type Either } from "../shared/Either.js";
+import { left, right, type Either } from "../../shared/Either.js";
 import { InvalidCollectionPointError } from "./errors/InvalidCollectionPointError.js";
-import { InvalidUserIdError } from "../shared/errors/InvalidUserIdError.js";
+import { InvalidUserIdError } from "../../shared/errors/InvalidUserIdError.js";
 import type { StudentData } from "./StudentData.js";
 import { CollectionPoint } from "./valueObjects/CollectionPoint.js";
-import { DateOfBirth } from "../shared/valueObjects/DateOfBirth.js";
-import type { InvalidDateOfBirthError } from "../shared/errors/InvalidDateOfBirthError.js";
+import { DateOfBirth } from "../../shared/valueObjects/DateOfBirth.js";
+import type { InvalidDateOfBirthError } from "../../shared/errors/InvalidDateOfBirthError.js";
 
 export type StudentProps = {
   readonly id: string;

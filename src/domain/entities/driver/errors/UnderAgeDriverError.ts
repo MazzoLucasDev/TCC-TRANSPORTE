@@ -1,4 +1,4 @@
-import type { DomainError } from "../../shared/errors/DomainError.js";
+import type { DomainError } from "../../../shared/errors/DomainError.js";
 
 export class UnderAgeError extends Error implements DomainError {
   constructor(age: number) {

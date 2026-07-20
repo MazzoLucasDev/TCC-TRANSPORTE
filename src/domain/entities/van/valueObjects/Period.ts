@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../../shared/Either.js";
+import { left, right, type Either } from "../../../shared/Either.js";
 import { InvalidPeriodError } from "../errors/InvalidPeriodError.js";
 
 const VALID_PERIOD = ["MANHA", "TARDE", "NOITE"] as const;

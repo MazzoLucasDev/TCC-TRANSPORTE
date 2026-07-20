@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../../shared/Either.js";
+import { left, right, type Either } from "../../../shared/Either.js";
 import { InvalidPhoneError } from "../errors/InvalidPhoneError.js";
 
 export class Phone {

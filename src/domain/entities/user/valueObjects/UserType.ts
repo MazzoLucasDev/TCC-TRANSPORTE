@@ -1,4 +1,4 @@
-import { left, right, type Either } from "../../shared/Either.js";
+import { left, right, type Either } from "../../../shared/Either.js";
 import { InvalidUserTypeError } from "../errors/InvalidUserTypeError.js";
 
 const TIPOS_VALIDOS = ["MOTORISTA", "ALUNO"] as const;

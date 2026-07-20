@@ -1,5 +1,5 @@
 import { InvalidNameError } from "../errors/InvalidNameError.js";
-import { right, left, type Either } from "../../shared/Either.js";
+import { right, left, type Either } from "../../../shared/Either.js";
 
 export class Name {
   private constructor(private readonly name: string) {
