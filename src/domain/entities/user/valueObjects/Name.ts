@@ -20,6 +20,10 @@ export class Name {
     return true;
   }
 
+  static restore(value: string): Name {
+    return new Name(value); // sem validar, confia que já foi validado antes
+  }
+
   get value(): string {
     return this.name;
   }

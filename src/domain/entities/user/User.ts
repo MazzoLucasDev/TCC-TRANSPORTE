@@ -10,6 +10,7 @@ import type { InvalidEmailError } from "./errors/InvalidEmailError.js";
 import type { InvalidPasswordError } from "./errors/InvalidPasswordError.js";
 import type { InvalidPhoneError } from "./errors/InvalidPhoneError.js";
 import type { InvalidUserTypeError } from "./errors/InvalidUserTypeError.js";
+import type { IPasswordHasher } from "../../services/IPasswordHasher.js";
 
 export type UserProps = {
   readonly id: string;
@@ -69,6 +70,24 @@ export class User {
       }),
     );
   }
+
+  public static reconstitute(props: {
+    id: string;
+    name: string;
+    email: string;
+    hashedPassword: string;
+    phone: string;
+    userType: string;
+  }): User {
+    return new User({
+      id: props.id,
+      name: Name.restore(props.name),
+      email: Email.restore(props.email),
+      password: Password.restore(props.hashedPassword),
+      phone: Phone.restore(props.phone),
+      userType: UserType.restore(props.userType),
+    });
+  }
   get id(): string {
     return this.props.id;
   }
@@ -87,5 +106,11 @@ export class User {
 
   get userType(): UserType {
     return this.props.userType;
+  }
+  async checkPassword(
+    plainText: string,
+    hasher: IPasswordHasher,
+  ): Promise<boolean> {
+    return hasher.compare(plainText, this.props.password.value);
   }
 }

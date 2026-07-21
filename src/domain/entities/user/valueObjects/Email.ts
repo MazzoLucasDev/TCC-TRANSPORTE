@@ -50,6 +50,10 @@ export class Email {
     return true;
   }
 
+  static restore(value: string): Email {
+    return new Email(value); // sem validar, confia que já foi validado antes
+  }
+
   get value(): string {
     return this.email;
   }

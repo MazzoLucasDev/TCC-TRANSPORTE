@@ -29,6 +29,10 @@ export class UserType {
     return this.type === "ALUNO";
   }
 
+  static restore(value: string): UserType {
+    return new UserType(value as TipoUsuario); // sem validar, confia que já foi validado antes
+  }
+
   get value(): TipoUsuario {
     return this.type;
   }

@@ -25,6 +25,10 @@ export class Phone {
     return true;
   }
 
+  static restore(value: string): Phone {
+    return new Phone(value); // sem validar, confia que já foi validado antes
+  }
+
   get value(): string {
     return this.phone;
   }
