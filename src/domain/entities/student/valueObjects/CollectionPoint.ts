@@ -11,8 +11,8 @@ const BRASIL_LNG_MIN = -73.99;
 const BRASIL_LNG_MAX = -28.84;
 export class CollectionPoint {
   private constructor(
-    private readonly long: number,
     private readonly lat: number,
+    private readonly long: number,
   ) {
     Object.freeze(this);
   }
