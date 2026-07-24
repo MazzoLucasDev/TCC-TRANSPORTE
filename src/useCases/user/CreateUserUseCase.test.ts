@@ -35,7 +35,7 @@ describe("CreateUserUseCase", () => {
     studentRepository = {
       findById: vi.fn(),
       findByUserId: vi.fn(),
-      findByVanId: vi.fn(),
+      listByVanId: vi.fn(),
       create: vi.fn().mockResolvedValue(undefined),
       update: vi.fn(),
       listAll: vi.fn(),

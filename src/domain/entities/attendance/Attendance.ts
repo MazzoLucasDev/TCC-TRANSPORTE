@@ -12,7 +12,7 @@ export type AttendanceProps = {
   status: AttendanceStatus;
 };
 
-export type AttendanceErrors = InvalidUserIdError | InvalidAttendanceDateError;
+export type AttendanceError = InvalidUserIdError | InvalidAttendanceDateError;
 
 export class Attendance {
   private constructor(private readonly props: AttendanceProps) {
@@ -21,7 +21,7 @@ export class Attendance {
 
   public static create(
     AttendanceData: AttendanceData,
-  ): Either<AttendanceErrors, Attendance> {
+  ): Either<AttendanceError, Attendance> {
     if (!AttendanceData.studentId || AttendanceData.studentId.length === 0) {
       return left(new InvalidUserIdError(AttendanceData.studentId));
     }
