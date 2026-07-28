@@ -5,7 +5,7 @@ import type { UseCase } from "../useCase.js";
 import { StudentAlreadyLinkedError } from "./errors/StudentAlreadyLinkedError.js";
 import { StudentNotFoundError } from "./errors/StudentNotFoundError.js";
 import { VanFullError } from "./errors/VanFullError.js";
-import { VanNotFoundError } from "./errors/VanNotFoundError.js";
+import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
 
 export type LinkStudentToVanInputDto = {
   studentId: string;
