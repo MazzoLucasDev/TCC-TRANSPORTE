@@ -24,3 +24,10 @@ coverage/
 *.ntvs*
 *.njsproj
 *.sln
+/src/generated/prisma
+
+
+.agents
+.claude
+.windsurf
+/src/generated/prisma

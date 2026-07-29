@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserModel {
+  id       String @id
+  name     String
+  email    String @unique
+  password String
+  phone    String
+  userType String
+
+  driver  DriverModel?
+  student StudentModel?
+
+  @@map("users")
+}
+
+model DriverModel {
+  id          String   @id
+  userId      String   @unique
+  license     String
+  dateOfBirth DateTime
+
+  user UserModel  @relation(fields: [userId], references: [id])
+  vans VanModel[]
+
+  @@map("drivers")
+}
+
+model StudentModel {
+  id          String   @id
+  userId      String   @unique
+  dateOfBirth DateTime
+  lat         Float
+  long        Float
+  vanId       String?
+
+  user UserModel @relation(fields: [userId], references: [id])
+  van  VanModel? @relation(fields: [vanId], references: [id])
+
+  @@map("students")
+}
+
+model VanModel {
+  id        String  @id
+  model     String
+  year      Int
+  period    String
+  destiny   String
+  capacity  Int
+  driverId  String
+  emTrajeto Boolean @default(false)
+
+  driver   DriverModel    @relation(fields: [driverId], references: [id])
+  students StudentModel[]
+  routes   RouteModel[]
+
+  @@map("vans")
+}
+
+model AttendanceModel {
+  id        String   @id
+  studentId String
+  date      DateTime
+  status    String
+
+  @@unique([studentId, date])
+  @@map("attendances")
+}
+
+model RouteModel {
+  id           String   @id
+  vanId        String
+  date         DateTime
+  type         String
+  studentOrder String[]
+  distanceKm   Float
+  durationMin  Float
+
+  van VanModel @relation(fields: [vanId], references: [id])
+
+  @@map("routes")
+}
