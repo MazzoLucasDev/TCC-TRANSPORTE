@@ -44,7 +44,7 @@ export class LoginUseCase implements UseCase<
   public async execute(
     input: LoginInputDto,
   ): Promise<Either<LoginError, LoginOutputDto>> {
-    const user = await this.userRepository.existsByEmail(input.email);
+    const user = await this.userRepository.findByEmail(input.email);
 
     if (!user) {
       return left(new InvalidCredentialsError());

@@ -50,7 +50,7 @@ describe("CreateVanUseCase", () => {
 
     userRepository = {
       findById: vi.fn().mockResolvedValue(driverUser),
-      existsByEmail: vi.fn(),
+      findByEmail: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       listAll: vi.fn(),

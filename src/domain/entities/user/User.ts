@@ -107,6 +107,23 @@ export class User {
   get userType(): UserType {
     return this.props.userType;
   }
+  toPersistence(): {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    userType: string;
+  } {
+    return {
+      id: this.props.id,
+      name: this.props.name.value,
+      email: this.props.email.value,
+      password: this.props.password.value,
+      phone: this.props.phone.value,
+      userType: this.props.userType.value,
+    };
+  }
   async checkPassword(
     plainText: string,
     hasher: IPasswordHasher,

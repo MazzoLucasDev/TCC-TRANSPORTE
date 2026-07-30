@@ -79,7 +79,7 @@ export class CreateUserUseCase implements UseCase<
   public async execute(
     input: CreateUserInputDto,
   ): Promise<Either<CreateUserError, CreateUserOutputDto>> {
-    const existingUser = await this.userRepository.existsByEmail(input.email);
+    const existingUser = await this.userRepository.findByEmail(input.email);
     if (existingUser) {
       return left(new DuplicateEmailError(input.email));
     }

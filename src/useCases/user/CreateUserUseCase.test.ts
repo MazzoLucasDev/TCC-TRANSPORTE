@@ -16,7 +16,7 @@ describe("CreateUserUseCase", () => {
     // recria os mocks antes de cada teste, pra um teste não vazar estado pro outro
     userRepository = {
       findById: vi.fn(),
-      existsByEmail: vi.fn().mockResolvedValue(null), // por padrão, e-mail não existe
+      findByEmail: vi.fn().mockResolvedValue(null), // por padrão, e-mail não existe
       create: vi.fn().mockResolvedValue(undefined),
       update: vi.fn(),
       listAll: vi.fn(),
@@ -90,7 +90,7 @@ describe("CreateUserUseCase", () => {
   });
 
   it("deve rejeitar e-mail já cadastrado", async () => {
-    userRepository.existsByEmail = vi.fn().mockResolvedValue({} as any); // simula que já existe
+    userRepository.findByEmail = vi.fn().mockResolvedValue({} as any); // simula que já existe
 
     const result = await sut.execute({
       name: "Ana Silva",

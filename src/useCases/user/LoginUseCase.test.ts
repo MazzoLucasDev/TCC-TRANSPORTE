@@ -24,7 +24,7 @@ describe("LoginUsecase", () => {
 
     userRepository = {
       findById: vi.fn(),
-      existsByEmail: vi.fn().mockResolvedValue(validUser),
+      findByEmail: vi.fn().mockResolvedValue(validUser),
       create: vi.fn(),
       update: vi.fn(),
       listAll: vi.fn(),
@@ -38,6 +38,7 @@ describe("LoginUsecase", () => {
 
     tokenService = {
       generate: vi.fn().mockReturnValue("fake-jwt-token"),
+      verify: vi.fn().mockReturnValue("aaaaaaa"),
     };
 
     sut = LoginUseCase.create(userRepository, passwordHasher, tokenService);
@@ -61,7 +62,7 @@ describe("LoginUsecase", () => {
   });
 
   it("deve rejeitar quando e-mail não existe", async () => {
-    userRepository.existsByEmail = vi.fn().mockResolvedValue(null);
+    userRepository.findByEmail = vi.fn().mockResolvedValue(null);
 
     const result = await sut.execute({
       email: "naoexiste@email.com",
@@ -85,7 +86,7 @@ describe("LoginUsecase", () => {
   });
 
   it("não deve gerar token se e-mail ou senha falharem", async () => {
-    userRepository.existsByEmail = vi.fn().mockResolvedValue(null);
+    userRepository.findByEmail = vi.fn().mockResolvedValue(null);
 
     await sut.execute({ email: "x@x.com", password: "123" });
 

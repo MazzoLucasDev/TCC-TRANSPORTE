@@ -4,13 +4,27 @@ services:
     container_name: tcc-transporte-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: usuario
-      POSTGRES_PASSWORD: senha
-      POSTGRES_DB: tcc_transporte
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: tcc-transporte-db-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_TEST_DB}
+    ports:
+      - "${POSTGRES_TEST_PORT}:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+
 volumes:
   postgres-data:
+  postgres-test-data:
