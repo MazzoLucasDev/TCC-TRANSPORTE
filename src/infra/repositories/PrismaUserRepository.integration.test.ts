@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { PrismaUserRepository } from "./PrismaUserRepository.js";
 import { User } from "../../domain/entities/user/User.js";
-import { prismaClient } from "../database/PrismaClient.js";
+import { prismaClient } from "../database/prismaClient.js";
 
 describe("PrismaUserRepository (integração)", () => {
   const sut = new PrismaUserRepository();
