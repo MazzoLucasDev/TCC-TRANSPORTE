@@ -21,6 +21,10 @@ export class Period {
     return VALID_PERIOD.includes(period as PeriodType);
   }
 
+  static restore(value: string): Period {
+    return new Period(value as PeriodType);
+  }
+
   get value(): PeriodType {
     return this.period;
   }

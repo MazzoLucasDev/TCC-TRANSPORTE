@@ -17,6 +17,7 @@ model UserModel {
 
   driver  DriverModel?
   student StudentModel?
+  vans    VanModel[]
 
   @@map("users")
 }
@@ -28,7 +29,7 @@ model DriverModel {
   dateOfBirth DateTime
 
   user UserModel  @relation(fields: [userId], references: [id])
-  vans VanModel[]
+  
 
   @@map("drivers")
 }
@@ -57,7 +58,7 @@ model VanModel {
   driverId  String
   emTrajeto Boolean @default(false)
 
-  driver   DriverModel    @relation(fields: [driverId], references: [id])
+  driver   UserModel    @relation(fields: [driverId], references: [id])
   students StudentModel[]
   routes   RouteModel[]
 

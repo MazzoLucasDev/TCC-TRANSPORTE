@@ -20,6 +20,9 @@ export class Destiny {
     }
     return true;
   }
+  static restore(value: string): Destiny {
+    return new Destiny(value);
+  }
   get value(): string {
     return this.destiny;
   }

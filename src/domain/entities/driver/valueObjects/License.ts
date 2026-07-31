@@ -18,4 +18,7 @@ export class License {
   get value(): string {
     return this.license;
   }
+  static restore(value: string): License {
+    return new License(value);
+  }
 }

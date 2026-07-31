@@ -5,6 +5,6 @@ export interface IVanRepository {
   update(van: Van): Promise<void>;
   listAll(): Promise<Van[]>;
   listDriverVans(driverId: string): Promise<Van[]>;
-  findById(vanId: string): Promise<Van | null>;
+  findById(id: string): Promise<Van | null>;
   delete(id: string): Promise<void>;
 }

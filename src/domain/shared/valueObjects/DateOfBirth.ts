@@ -51,6 +51,10 @@ export class DateOfBirth {
     return age;
   }
 
+  static restore(date: Date): DateOfBirth {
+    return new DateOfBirth(date);
+  }
+
   get value(): Date {
     return this.date;
   }

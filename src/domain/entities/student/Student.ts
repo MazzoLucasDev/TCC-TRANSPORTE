@@ -87,4 +87,41 @@ export class Student {
   getAge(): number {
     return this.props.dateOfBirth.getAge();
   }
+  toPersistence(): {
+    id: string;
+    userId: string;
+    dateOfBirth: Date;
+    lat: number;
+    long: number;
+    vanId: string | null;
+  } {
+    return {
+      id: this.props.id,
+      userId: this.props.userId,
+      dateOfBirth: this.props.dateOfBirth.value,
+      lat: this.props.collectionPoint.value.lat,
+      long: this.props.collectionPoint.value.long,
+      vanId: this.props.vanId,
+    };
+  }
+
+  static reconstitute(props: {
+    id: string;
+    userId: string;
+    dateOfBirth: Date;
+    lat: number;
+    long: number;
+    vanId: string | null;
+  }): Student {
+    return new Student({
+      id: props.id,
+      userId: props.userId,
+      dateOfBirth: DateOfBirth.restore(props.dateOfBirth),
+      collectionPoint: CollectionPoint.restore({
+        lat: props.lat,
+        long: props.long,
+      }),
+      vanId: props.vanId,
+    });
+  }
 }

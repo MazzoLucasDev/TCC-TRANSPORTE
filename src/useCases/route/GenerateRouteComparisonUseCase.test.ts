@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GenerateRouteComparisonUseCase } from "./GenerateRouteComparisonUseCase.js";
-import { HaversineRouteCalculatorService } from "../../infra/service/HaversineRouteCalculatorService.js";
+import { HaversineRouteCalculatorService } from "../../infra/services/HaversineRouteCalculatorService.js";
 import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { IAttendanceRepository } from "../../domain/repositories/IAttendanceRepository.js";

@@ -24,6 +24,11 @@ export class Year {
     }
     return true;
   }
+
+  static restore(value: number): Year {
+    return new Year(value);
+  }
+
   get value(): number {
     return this.year;
   }

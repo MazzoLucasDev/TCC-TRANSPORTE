@@ -21,6 +21,10 @@ export class Model {
     return true;
   }
 
+  static restore(value: string): Model {
+    return new Model(value);
+  }
+
   get value(): string {
     return this.model;
   }

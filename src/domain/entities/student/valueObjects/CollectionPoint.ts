@@ -42,6 +42,10 @@ export class CollectionPoint {
     return true;
   }
 
+  static restore(data: CollectionPointData): CollectionPoint {
+    return new CollectionPoint(data.lat, data.long);
+  }
+
   get value(): CollectionPointData {
     return { lat: this.lat, long: this.long };
   }

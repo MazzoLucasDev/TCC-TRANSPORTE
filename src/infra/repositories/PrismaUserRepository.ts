@@ -30,16 +30,7 @@ export class PrismaUserRepository implements IUserRepository {
 
   async listAll(): Promise<User[]> {
     const rows = await prismaClient.userModel.findMany();
-    return rows.map(
-      (row: {
-        id: string;
-        name: string;
-        email: string;
-        password: string;
-        phone: string;
-        userType: string;
-      }) => this.toDomain(row),
-    );
+    return rows.map((row: any) => this.toDomain(row));
   }
 
   async delete(id: string): Promise<void> {

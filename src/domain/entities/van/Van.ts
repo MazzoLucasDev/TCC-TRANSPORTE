@@ -96,6 +96,50 @@ export class Van {
     return this.props.emTrajeto;
   }
 
+  toPersistence(): {
+    id: string;
+    model: string;
+    year: number;
+    period: string;
+    destiny: string;
+    capacity: number;
+    driverId: string;
+    emTrajeto: boolean;
+  } {
+    return {
+      id: this.props.id,
+      model: this.props.model.value,
+      year: this.props.year.value,
+      period: this.props.period.value,
+      destiny: this.props.destiny.value,
+      capacity: this.props.capacity.value,
+      driverId: this.props.driverId,
+      emTrajeto: this.props.emTrajeto,
+    };
+  }
+
+  static reconstitute(props: {
+    id: string;
+    model: string;
+    year: number;
+    period: string;
+    destiny: string;
+    capacity: number;
+    driverId: string;
+    emTrajeto: boolean;
+  }): Van {
+    return new Van({
+      id: props.id,
+      model: Model.restore(props.model),
+      year: Year.restore(props.year),
+      period: Period.restore(props.period),
+      destiny: Destiny.restore(props.destiny),
+      capacity: Capacity.restore(props.capacity),
+      driverId: props.driverId,
+      emTrajeto: props.emTrajeto,
+    });
+  }
+
   verificarCapacidade(quantidadeAtual: number): boolean {
     return quantidadeAtual < this.capacity.value;
   }

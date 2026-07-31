@@ -22,6 +22,9 @@ export class Capacity {
     }
     return true;
   }
+  static restore(value: number): Capacity {
+    return new Capacity(value);
+  }
   get value(): number {
     return this.capacity;
   }

@@ -77,4 +77,32 @@ export class Driver {
   getAge(): number {
     return this.props.dateOfBirth.getAge();
   }
+
+  toPersistence(): {
+    id: string;
+    userId: string;
+    license: string;
+    dateOfBirth: Date;
+  } {
+    return {
+      id: this.props.id,
+      userId: this.props.userId,
+      license: this.props.license.value,
+      dateOfBirth: this.props.dateOfBirth.value,
+    };
+  }
+
+  static reconstitute(props: {
+    id: string;
+    userId: string;
+    license: string;
+    dateOfBirth: Date;
+  }): Driver {
+    return new Driver({
+      id: props.id,
+      userId: props.userId,
+      license: License.restore(props.license),
+      dateOfBirth: DateOfBirth.restore(props.dateOfBirth),
+    });
+  }
 }
