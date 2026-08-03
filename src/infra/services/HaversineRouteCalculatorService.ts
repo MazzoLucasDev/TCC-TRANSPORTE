@@ -12,11 +12,11 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
     points: RoutePoint[],
   ): RouteCalculatorResult {
     const order = points.map((p) => p.studentId);
-    const distanceKM = this.calculateTotalDistance(origin, points);
+    const distanceKm = this.calculateTotalDistance(origin, points);
     return {
       order,
-      distanceKM,
-      durationMin: this.distanceToMinutes(distanceKM),
+      distanceKm,
+      durationMin: this.distanceToMinutes(distanceKm),
     };
   }
   calculateOptimized(
@@ -58,7 +58,7 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
     }
     return {
       order,
-      distanceKM: totalDistance,
+      distanceKm: totalDistance,
       durationMin: this.distanceToMinutes(totalDistance),
     };
   }
@@ -103,7 +103,7 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
     return (degrees * Math.PI) / 180;
   }
 
-  private distanceToMinutes(distanceKM: number): number {
-    return (distanceKM / AVERAGE_SPEED_KMH) * 60;
+  private distanceToMinutes(distanceKm: number): number {
+    return (distanceKm / AVERAGE_SPEED_KMH) * 60;
   }
 }

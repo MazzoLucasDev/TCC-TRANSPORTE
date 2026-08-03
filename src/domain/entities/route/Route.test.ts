@@ -7,7 +7,7 @@ describe("Route", () => {
     date: new Date("2026-07-17"),
     type: "OPTIMIZED" as const,
     studentOrder: ["student-1", "student-2", "student-3"],
-    distanceKM: 12.5,
+    distanceKm: 12.5,
     durationMin: 25,
   };
 
@@ -22,7 +22,7 @@ describe("Route", () => {
   });
 
   it("deve rejeitar distância negativa", () => {
-    const result = Route.create({ ...validRouteProps, distanceKM: -5 });
+    const result = Route.create({ ...validRouteProps, distanceKm: -5 });
     expect(result.isLeft()).toBe(true);
   });
 

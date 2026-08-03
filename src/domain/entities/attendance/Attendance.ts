@@ -63,4 +63,32 @@ export class Attendance {
   isPresent(): boolean {
     return this.props.status === "PRESENT";
   }
+
+  toPersistence(): {
+    id: string;
+    studentId: string;
+    date: Date;
+    status: string;
+  } {
+    return {
+      id: this.props.id,
+      studentId: this.props.studentId,
+      date: this.props.date,
+      status: this.props.status,
+    };
+  }
+
+  static reconstitute(props: {
+    id: string;
+    studentId: string;
+    date: Date;
+    status: string;
+  }): Attendance {
+    return new Attendance({
+      id: props.id,
+      studentId: props.studentId,
+      date: props.date,
+      status: props.status as AttendanceStatus,
+    });
+  }
 }

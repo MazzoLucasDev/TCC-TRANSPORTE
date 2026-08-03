@@ -9,7 +9,7 @@ export type RouteProps = {
   readonly date: Date;
   readonly type: RouteType;
   readonly studentOrder: string[];
-  readonly distanceKM: number;
+  readonly distanceKm: number;
   readonly durationMin: number;
 };
 
@@ -23,7 +23,7 @@ export class Route {
     date: Date;
     type: RouteType;
     studentOrder: string[];
-    distanceKM: number;
+    distanceKm: number;
     durationMin: number;
   }): Either<InvalidRouteError, Route> {
     if (!props.vanId || props.vanId.trim().length === 0) {
@@ -34,7 +34,7 @@ export class Route {
       return left(new InvalidRouteError("Lista de alunos não pode ser 0."));
     }
 
-    if (props.distanceKM < 0) {
+    if (props.distanceKm < 0) {
       return left(new InvalidRouteError("Distância não pode ser negativa!"));
     }
 
@@ -48,7 +48,7 @@ export class Route {
         date: props.date,
         type: props.type,
         studentOrder: props.studentOrder,
-        distanceKM: props.distanceKM,
+        distanceKm: props.distanceKm,
         durationMin: props.durationMin,
       }),
     );
@@ -74,12 +74,51 @@ export class Route {
   }
 
   get distanceKm(): number {
-    return this.props.distanceKM;
+    return this.props.distanceKm;
   }
   get durationMin(): number {
     return this.props.durationMin;
   }
   isOptimized(): boolean {
     return this.props.type === "OPTIMIZED";
+  }
+
+  toPersistence(): {
+    id: string;
+    vanId: string;
+    date: Date;
+    type: string;
+    studentOrder: string[];
+    distanceKm: number;
+    durationMin: number;
+  } {
+    return {
+      id: this.props.id,
+      vanId: this.props.vanId,
+      date: this.props.date,
+      type: this.props.type,
+      studentOrder: this.props.studentOrder,
+      distanceKm: this.props.distanceKm,
+      durationMin: this.props.durationMin,
+    };
+  }
+  static reconstitute(props: {
+    id: string;
+    vanId: string;
+    date: Date;
+    type: string;
+    studentOrder: string[];
+    distanceKm: number;
+    durationMin: number;
+  }): Route {
+    return new Route({
+      id: props.id,
+      vanId: props.vanId,
+      date: props.date,
+      type: props.type as RouteType,
+      studentOrder: props.studentOrder,
+      distanceKm: props.distanceKm,
+      durationMin: props.durationMin,
+    });
   }
 }

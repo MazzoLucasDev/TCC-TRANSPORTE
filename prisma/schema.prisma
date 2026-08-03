@@ -42,8 +42,9 @@ model StudentModel {
   long        Float
   vanId       String?
 
-  user UserModel @relation(fields: [userId], references: [id])
-  van  VanModel? @relation(fields: [vanId], references: [id])
+  user        UserModel         @relation(fields: [userId], references: [id])
+  van         VanModel?         @relation(fields: [vanId], references: [id])
+  attendances AttendanceModel[]
 
   @@map("students")
 }
@@ -70,6 +71,8 @@ model AttendanceModel {
   studentId String
   date      DateTime
   status    String
+
+  student StudentModel @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, date])
   @@map("attendances")

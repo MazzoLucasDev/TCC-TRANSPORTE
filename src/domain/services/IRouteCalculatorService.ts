@@ -6,7 +6,7 @@ export type RoutePoint = {
 
 export type RouteCalculatorResult = {
   order: string[]; // ordem dos alunos
-  distanceKM: number;
+  distanceKm: number;
   durationMin: number;
 };
 

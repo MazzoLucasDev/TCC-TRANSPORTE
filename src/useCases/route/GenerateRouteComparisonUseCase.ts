@@ -99,7 +99,7 @@ export class GenerateRouteComparisonUseCase implements UseCase<
       date: parsedDate,
       type: "SIMPLE",
       studentOrder: simpleResult.order,
-      distanceKM: simpleResult.distanceKM,
+      distanceKm: simpleResult.distanceKm,
       durationMin: simpleResult.durationMin,
     });
     const optimizedRouteOrError = Route.create({
@@ -107,7 +107,7 @@ export class GenerateRouteComparisonUseCase implements UseCase<
       date: parsedDate,
       type: "OPTIMIZED",
       studentOrder: optimizedResult.order,
-      distanceKM: optimizedResult.distanceKM,
+      distanceKm: optimizedResult.distanceKm,
       durationMin: optimizedResult.durationMin,
     });
     if (simpleRouteOrError.isRight()) {
@@ -151,12 +151,12 @@ export class GenerateRouteComparisonUseCase implements UseCase<
     return {
       simpleRoute: {
         studentOrder: simpleResult.order,
-        distanceKm: simpleResult.distanceKM,
+        distanceKm: simpleResult.distanceKm,
         durationMin: simpleResult.durationMin,
       },
       optimizedRoute: {
         studentOrder: optimizedResult.order,
-        distanceKm: optimizedResult.distanceKM,
+        distanceKm: optimizedResult.distanceKm,
         durationMin: optimizedResult.durationMin,
       },
     };
