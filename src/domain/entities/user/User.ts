@@ -7,7 +7,6 @@ import type { UserData } from "./UserData.js";
 import { left, right, type Either } from "../../shared/Either.js";
 import type { InvalidNameError } from "./errors/InvalidNameError.js";
 import type { InvalidEmailError } from "./errors/InvalidEmailError.js";
-import type { InvalidPasswordError } from "./errors/InvalidPasswordError.js";
 import type { InvalidPhoneError } from "./errors/InvalidPhoneError.js";
 import type { InvalidUserTypeError } from "./errors/InvalidUserTypeError.js";
 import type { IPasswordHasher } from "../../services/IPasswordHasher.js";
@@ -24,7 +23,6 @@ export type UserProps = {
 export type UserError =
   | InvalidNameError
   | InvalidEmailError
-  | InvalidPasswordError
   | InvalidPhoneError
   | InvalidUserTypeError;
 
@@ -36,7 +34,6 @@ export class User {
   public static create(userData: UserData): Either<UserError, User> {
     const nameOrError = Name.create(userData.name);
     const emailOrError = Email.create(userData.email);
-    const passOrError = Password.create(userData.password);
     const phoneOrError = Phone.create(userData.phone);
     const userTypeOrError = UserType.create(userData.userType);
     if (nameOrError.isLeft()) {
@@ -44,9 +41,6 @@ export class User {
     }
     if (emailOrError.isLeft()) {
       return left(emailOrError.value);
-    }
-    if (passOrError.isLeft()) {
-      return left(passOrError.value);
     }
     if (phoneOrError.isLeft()) {
       return left(phoneOrError.value);
@@ -56,7 +50,7 @@ export class User {
     }
     const name = nameOrError.value;
     const email = emailOrError.value;
-    const password = passOrError.value;
+    const password = Password.restore(userData.password);
     const phone = phoneOrError.value;
     const userType = userTypeOrError.value;
     return right(

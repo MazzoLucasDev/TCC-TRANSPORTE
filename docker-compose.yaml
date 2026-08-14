@@ -24,6 +24,18 @@ services:
       - "${POSTGRES_TEST_PORT}:5432"
     volumes:
       - postgres-test-data:/var/lib/postgresql/data
+  app:
+    build: .
+    container_name: tcc-transporte-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 3000
+    depends_on:
+      - postgres
 
 volumes:
   postgres-data:

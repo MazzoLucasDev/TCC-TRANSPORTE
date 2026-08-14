@@ -1,5 +1,6 @@
 import type { Student } from "../../domain/entities/student/Student.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { UseCase } from "../useCase.js";
 
 export type ListVanStudentInputDto = {

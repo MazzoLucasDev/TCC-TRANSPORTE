@@ -1,5 +1,7 @@
 import type { User } from "../../domain/entities/user/User.js";
 import { UserType } from "../../domain/entities/user/valueObjects/UserType.js";
+import type { IDriverRepository } from "../../domain/repositories/IDriverRepository.js";
+import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { IPasswordHasher } from "../../domain/services/IPasswordHasher.js";
 import type { ITokenService } from "../../domain/services/ITokenService.js";
@@ -19,6 +21,7 @@ export type LoginOutputDto = {
     name: string;
     userType: string;
   };
+  roleId: string;
 };
 
 export type LoginError = InvalidCredentialsError;
@@ -29,16 +32,26 @@ export class LoginUseCase implements UseCase<
 > {
   private constructor(
     private readonly userRepository: IUserRepository,
+    private readonly driverRepository: IDriverRepository,
+    private readonly studentRepository: IStudentRepository,
     private readonly passwordHasher: IPasswordHasher,
     private readonly tokenService: ITokenService,
   ) {}
 
   public static create(
     userRepository: IUserRepository,
+    driverRepository: IDriverRepository,
+    studentRepository: IStudentRepository,
     passwodHasher: IPasswordHasher,
     tokenService: ITokenService,
   ) {
-    return new LoginUseCase(userRepository, passwodHasher, tokenService);
+    return new LoginUseCase(
+      userRepository,
+      driverRepository,
+      studentRepository,
+      passwodHasher,
+      tokenService,
+    );
   }
 
   public async execute(
@@ -59,14 +72,22 @@ export class LoginUseCase implements UseCase<
       return left(new InvalidCredentialsError());
     }
 
+    const roleId = user.userType.isMotorista()
+      ? (await this.driverRepository.findByUserId(user.id))?.id
+      : (await this.studentRepository.findByUserId(user.id))?.id;
+
     const token = this.tokenService.generate({
       userId: user.id,
       userType: user.userType.value,
     });
 
-    return right(this.presentOutput(user, token));
+    return right(this.presentOutput(user, token, roleId ?? ""));
   }
-  private presentOutput(user: User, token: string): LoginOutputDto {
+  private presentOutput(
+    user: User,
+    token: string,
+    roleId: string,
+  ): LoginOutputDto {
     return {
       token,
       user: {
@@ -74,6 +95,7 @@ export class LoginUseCase implements UseCase<
         name: user.name.value,
         userType: user.userType.value,
       },
+      roleId,
     };
   }
 }

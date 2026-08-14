@@ -6,7 +6,9 @@ import {
   Student,
   type StudentError,
 } from "../../domain/entities/student/Student.js";
+import type { InvalidPasswordError } from "../../domain/entities/user/errors/InvalidPasswordError.js";
 import { User, type UserError } from "../../domain/entities/user/User.js";
+import { Password } from "../../domain/entities/user/valueObjects/Password.js";
 import type { IDriverRepository } from "../../domain/repositories/IDriverRepository.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
@@ -43,10 +45,12 @@ export type CreateUserOutputDto = {
   id: string;
   name: string;
   userType: string;
+  roleId: string;
 };
 
 export type CreateUserError =
   | DuplicateEmailError
+  | InvalidPasswordError
   | UserError
   | DriverError
   | StudentError;
@@ -84,12 +88,16 @@ export class CreateUserUseCase implements UseCase<
       return left(new DuplicateEmailError(input.email));
     }
 
+    const passwordOrError = Password.create(input.password);
+    if (passwordOrError.isLeft()) {
+      return left(passwordOrError.value);
+    }
     const hashedPassword = await this.passwodHasher.hash(input.password);
 
     const userOrError = User.create({
       name: input.name,
       email: input.email,
-      password: input.password,
+      password: hashedPassword,
       phone: input.phone,
       userType: input.userType,
     });
@@ -110,6 +118,8 @@ export class CreateUserUseCase implements UseCase<
       }
       await this.userRepository.create(user);
       await this.driverRepository.create(driverOrError.value);
+
+      return right(this.presentOutput(user, driverOrError.value.id));
     } else {
       const studentOrError = Student.create({
         userId: user.id,
@@ -121,15 +131,16 @@ export class CreateUserUseCase implements UseCase<
       }
       await this.userRepository.create(user);
       await this.studentRepository.create(studentOrError.value);
+      return right(this.presentOutput(user, studentOrError.value.id));
     }
-    return right(this.presentOutput(user));
   }
 
-  private presentOutput(user: User): CreateUserOutputDto {
+  private presentOutput(user: User, roleId: string): CreateUserOutputDto {
     return {
       id: user.id,
       name: user.name.value,
       userType: user.userType.value,
+      roleId,
     };
   }
 }
