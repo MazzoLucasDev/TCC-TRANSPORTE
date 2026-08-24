@@ -7,6 +7,7 @@ import type { VanController } from "./controllers/VanController.js";
 import {
   createAuthMiddleware,
   requireDriver,
+  requireSelf,
 } from "./middlewares/authMiddleware.js";
 
 export function buildRoutes(
@@ -22,6 +23,12 @@ export function buildRoutes(
   //publico
   //user
   router.post("/users", (req, res) => userController.create(req, res));
+  router.patch("/users/:userId", authenticate, requireSelf, (req, res) =>
+    userController.update(req, res),
+  );
+  router.delete("/users/:userId", authenticate, requireSelf, (req, res) =>
+    userController.delete(req, res),
+  );
   router.post("/login", (req, res) => userController.login(req, res));
 
   //autenticado
@@ -33,12 +40,20 @@ export function buildRoutes(
   router.get("/vans/driver/:driverId", authenticate, (req, res) =>
     vanController.listByDriver(req, res),
   );
-
-  //student
+  //driver
   router.post("/student/link", authenticate, requireDriver, (req, res) =>
     studentController.link(req, res),
   );
 
+  router.post("/student/unlink", authenticate, requireDriver, (req, res) =>
+    studentController.unlink(req, res),
+  );
+
+  router.post("/routes/generate", authenticate, requireDriver, (req, res) =>
+    routeController.generate(req, res),
+  );
+
+  //student
   router.get("/students/van/:vanId", authenticate, (req, res) =>
     studentController.listByVan(req, res),
   );
@@ -49,11 +64,6 @@ export function buildRoutes(
 
   router.get("/attendance/confirmed", authenticate, (req, res) =>
     studentController.listConfirmed(req, res),
-  );
-
-  //route
-  router.post("/routes/generate", authenticate, requireDriver, (req, res) =>
-    routeController.generate(req, res),
   );
 
   return router;

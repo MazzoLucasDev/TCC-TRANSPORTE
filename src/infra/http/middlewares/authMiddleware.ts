@@ -43,3 +43,19 @@ export function requireDriver(
   }
   next();
 }
+
+export function requireSelf(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Response | void {
+  const targetUserId = req.params.userId;
+
+  if (req.userId !== targetUserId) {
+    return res
+      .status(403)
+      .json({ error: "Você só pode alterar seus próprios dados" });
+  }
+
+  next();
+}

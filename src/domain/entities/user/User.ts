@@ -101,6 +101,9 @@ export class User {
   get userType(): UserType {
     return this.props.userType;
   }
+  withUpdatedContactInfo(name: Name, phone: Phone): User {
+    return new User({ ...this.props, name, phone });
+  }
   toPersistence(): {
     id: string;
     name: string;
