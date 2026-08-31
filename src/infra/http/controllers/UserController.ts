@@ -4,6 +4,7 @@ import type { LoginUseCase } from "../../../useCases/user/LoginUseCase.js";
 import type { Request, Response } from "express";
 import type { UpdateUserUseCase } from "../../../useCases/user/UpdateUserUseCase.js";
 import type { DeleteUserUseCase } from "../../../useCases/user/DeleteUserCase.js";
+import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 
 export class UserController {
   constructor(
@@ -13,7 +14,7 @@ export class UserController {
     private readonly loginUseCase: LoginUseCase,
   ) {}
 
-  async create(req: Request, res: Response): Promise<Response> {
+  async create(req: AuthenticatedRequest, res: Response): Promise<Response> {
     const result = await this.createUserUseCase.execute(req.body);
 
     if (result.isLeft()) {
@@ -22,10 +23,10 @@ export class UserController {
 
     return res.status(201).json(result.value);
   }
-  async update(req: Request, res: Response): Promise<Response> {
+  async update(req: AuthenticatedRequest, res: Response): Promise<Response> {
     const userId = req.params.userId;
     if (typeof userId !== "string") {
-      return res.status(400).json({ error: "UserId é obrigatório" });
+      return res.status(400).json({ error: "UserId é obrigatório!" });
     }
     const result = await this.updateUserUseCase.execute({
       userId,
@@ -39,10 +40,10 @@ export class UserController {
     return res.status(200).json(result.value);
   }
 
-  async delete(req: Request, res: Response): Promise<Response> {
+  async delete(req: AuthenticatedRequest, res: Response): Promise<Response> {
     const userId = req.params.userId;
     if (typeof userId !== "string") {
-      return res.status(400).json({ error: "UserId é obrigatório" });
+      return res.status(400).json({ error: "UserId é obrigatório!" });
     }
     const result = await this.deleteUserUseCase.execute({ id: userId });
 
@@ -53,7 +54,7 @@ export class UserController {
     return res.status(200).json(result.value);
   }
 
-  async login(req: Request, res: Response): Promise<Response> {
+  async login(req: AuthenticatedRequest, res: Response): Promise<Response> {
     const result = await this.loginUseCase.execute(req.body);
 
     if (result.isLeft()) {

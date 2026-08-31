@@ -87,6 +87,12 @@ export class Student {
   getAge(): number {
     return this.props.dateOfBirth.getAge();
   }
+  withUpdatedDetails(props: {
+    dateOfBirth: DateOfBirth;
+    collectionPoint: CollectionPoint;
+  }): Student {
+    return new Student({ ...this.props, ...props });
+  }
   toPersistence(): {
     id: string;
     userId: string;

@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
 import type { GenerateRouteComparisonUseCase } from "../../../useCases/route/GenerateRouteComparisonUseCase.js";
+import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 
 export class RouteController {
   constructor(
     private readonly generateRouteComparisonUseCase: GenerateRouteComparisonUseCase,
   ) {}
 
-  async generate(req: Request, res: Response): Promise<Response> {
+  async generate(req: AuthenticatedRequest, res: Response): Promise<Response> {
     const result = await this.generateRouteComparisonUseCase.execute(req.body);
 
     if (result.isLeft()) {

@@ -6,10 +6,12 @@ import { StudentAlreadyLinkedError } from "./errors/StudentAlreadyLinkedError.js
 import { StudentNotFoundError } from "./errors/StudentNotFoundError.js";
 import { VanFullError } from "./errors/VanFullError.js";
 import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
+import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
 
 export type LinkStudentToVanInputDto = {
   studentId: string;
   vanId: string;
+  requesterId: string;
 };
 
 export type LinkStudentToVanOutputDto = {
@@ -21,7 +23,8 @@ export type LinkStudentToVanError =
   | StudentAlreadyLinkedError
   | StudentNotFoundError
   | VanNotFoundError
-  | VanFullError;
+  | VanFullError
+  | NotVanOwnerError;
 
 export class LinkStudentToVanUseCase implements UseCase<
   LinkStudentToVanInputDto,
@@ -45,6 +48,9 @@ export class LinkStudentToVanUseCase implements UseCase<
     const van = await this.vanRepository.findById(input.vanId);
     if (!van) {
       return left(new VanNotFoundError(input.vanId));
+    }
+    if (van.driverId !== input.requesterId) {
+      return left(new NotVanOwnerError(input.vanId));
     }
 
     const student = await this.studentRepository.findById(input.studentId);

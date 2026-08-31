@@ -13,6 +13,8 @@ describe("LinkStudentToVanUseCase", () => {
   let unlinkedStudent: Student;
   let linkedStudent: Student;
 
+  const DRIVER_ID = "driver-1";
+
   beforeEach(() => {
     const vanResult = Van.create({
       model: "Sprinter",
@@ -20,7 +22,7 @@ describe("LinkStudentToVanUseCase", () => {
       period: "MANHA",
       destiny: "Colégio X",
       capacity: 2,
-      driverId: "driver-1",
+      driverId: DRIVER_ID,
     });
     if (vanResult.isLeft()) throw new Error("Falha ao montar van");
     van = vanResult.value;
@@ -46,7 +48,7 @@ describe("LinkStudentToVanUseCase", () => {
     studentRepository = {
       findById: vi.fn().mockResolvedValue(unlinkedStudent),
       findByUserId: vi.fn(),
-      listByVanId: vi.fn().mockResolvedValue([]), // van vazia por padrão
+      listByVanId: vi.fn().mockResolvedValue([]),
       create: vi.fn(),
       update: vi.fn().mockResolvedValue(undefined),
       listAll: vi.fn(),
@@ -56,14 +58,26 @@ describe("LinkStudentToVanUseCase", () => {
     sut = LinkStudentToVanUseCase.create(vanRepository, studentRepository);
   });
 
-  it("deve vincular aluno à van com sucesso", async () => {
+  it("deve vincular aluno à van com sucesso quando o requester é o dono da van", async () => {
     const result = await sut.execute({
       studentId: unlinkedStudent.id,
       vanId: van.id,
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isRight()).toBe(true);
     expect(studentRepository.update).toHaveBeenCalledOnce();
+  });
+
+  it("deve rejeitar quando o requester não é o motorista dono da van", async () => {
+    const result = await sut.execute({
+      studentId: unlinkedStudent.id,
+      vanId: van.id,
+      requesterId: "outro-motorista-id",
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(studentRepository.update).not.toHaveBeenCalled();
   });
 
   it("deve rejeitar quando a van não existe", async () => {
@@ -72,6 +86,7 @@ describe("LinkStudentToVanUseCase", () => {
     const result = await sut.execute({
       studentId: unlinkedStudent.id,
       vanId: "van-inexistente",
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isLeft()).toBe(true);
@@ -84,6 +99,7 @@ describe("LinkStudentToVanUseCase", () => {
     const result = await sut.execute({
       studentId: "student-inexistente",
       vanId: van.id,
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isLeft()).toBe(true);
@@ -95,6 +111,7 @@ describe("LinkStudentToVanUseCase", () => {
     const result = await sut.execute({
       studentId: linkedStudent.id,
       vanId: van.id,
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isLeft()).toBe(true);
@@ -102,7 +119,6 @@ describe("LinkStudentToVanUseCase", () => {
   });
 
   it("deve rejeitar quando a van está cheia (RF12)", async () => {
-    // capacidade é 2, então 2 alunos já vinculados = cheia
     studentRepository.listByVanId = vi
       .fn()
       .mockResolvedValue([unlinkedStudent, unlinkedStudent]);
@@ -110,6 +126,7 @@ describe("LinkStudentToVanUseCase", () => {
     const result = await sut.execute({
       studentId: unlinkedStudent.id,
       vanId: van.id,
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isLeft()).toBe(true);
@@ -119,11 +136,12 @@ describe("LinkStudentToVanUseCase", () => {
   it("deve permitir vincular quando a van tem exatamente 1 vaga restante", async () => {
     studentRepository.listByVanId = vi
       .fn()
-      .mockResolvedValue([unlinkedStudent]); // 1 de 2 ocupada
+      .mockResolvedValue([unlinkedStudent]);
 
     const result = await sut.execute({
       studentId: unlinkedStudent.id,
       vanId: van.id,
+      requesterId: DRIVER_ID,
     });
 
     expect(result.isRight()).toBe(true);

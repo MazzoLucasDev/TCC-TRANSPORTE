@@ -78,6 +78,13 @@ export class Driver {
     return this.props.dateOfBirth.getAge();
   }
 
+  withUpdatedDetails(props: {
+    license: License;
+    dateOfBirth: DateOfBirth;
+  }): Driver {
+    return new Driver({ ...this.props, ...props });
+  }
+
   toPersistence(): {
     id: string;
     userId: string;

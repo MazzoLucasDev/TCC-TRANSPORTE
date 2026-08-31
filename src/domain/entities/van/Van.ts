@@ -96,6 +96,16 @@ export class Van {
     return this.props.emTrajeto;
   }
 
+  withUpdatedDetails(props: {
+    model: Model;
+    year: Year;
+    period: Period;
+    destiny: Destiny;
+    capacity: Capacity;
+  }): Van {
+    return new Van({ ...this.props, ...props });
+  }
+
   toPersistence(): {
     id: string;
     model: string;
