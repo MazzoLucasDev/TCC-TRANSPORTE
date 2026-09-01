@@ -84,12 +84,12 @@ export class GenerateRouteComparisonUseCase implements UseCase<
 
     const parsedDate = new Date(input.date);
 
-    const simpleResult = this.routeCalculator.calculateFixedOrder(
+    const simpleResult = await this.routeCalculator.calculateFixedOrder(
       input.driverLocation,
       confirmedPoints,
     );
 
-    const optimizedResult = this.routeCalculator.calculateOptimized(
+    const optimizedResult = await this.routeCalculator.calculateOptimized(
       input.driverLocation,
       confirmedPoints,
     );

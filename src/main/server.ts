@@ -52,6 +52,7 @@ import { RouteController } from "../infra/http/controllers/RouteController.js";
 
 // Rotas
 import { buildRoutes } from "../infra/http/routes.js";
+import { OsrmRouteCalculatorService } from "../infra/services/OSRMRouteCalculatorService.js";
 
 function assertEnv(name: string): string {
   const value = process.env[name];
@@ -73,7 +74,7 @@ function bootstrap() {
   // Serviços
   const passwordHasher = new BcryptPasswordHasher();
   const tokenService = new JwtTokenService(assertEnv("JWT_SECRET"));
-  const routeCalculator = new HaversineRouteCalculatorService();
+  const routeCalculator = new OsrmRouteCalculatorService();
 
   // Use Cases - User
   const createUserUseCase = CreateUserUseCase.create(

@@ -14,10 +14,10 @@ export interface IRouteCalculatorService {
   calculateFixedOrder(
     origin: { lat: number; long: number },
     points: RoutePoint[],
-  ): RouteCalculatorResult;
+  ): Promise<RouteCalculatorResult>;
 
   calculateOptimized(
     origin: { lat: number; long: number },
     points: RoutePoint[],
-  ): RouteCalculatorResult;
+  ): Promise<RouteCalculatorResult>;
 }
