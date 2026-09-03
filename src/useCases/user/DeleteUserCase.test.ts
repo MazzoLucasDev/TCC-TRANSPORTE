@@ -3,14 +3,17 @@ import { DeleteUserUseCase } from "./DeleteUserCase";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository";
 import type { IDriverRepository } from "../../domain/repositories/IDriverRepository";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository";
+import type { IVanRepository } from "../../domain/repositories/IVanRepository";
 import { User } from "../../domain/entities/user/User";
 import { Driver } from "../../domain/entities/driver/Driver";
 import { Student } from "../../domain/entities/student/Student";
+import { Van } from "../../domain/entities/van/Van";
 
 describe("DeleteUserUseCase", () => {
   let userRepository: IUserRepository;
   let driverRepository: IDriverRepository;
   let studentRepository: IStudentRepository;
+  let vanRepository: IVanRepository;
   let sut: DeleteUserUseCase;
   let driverUser: User;
   let studentUser: User;
@@ -62,14 +65,24 @@ describe("DeleteUserUseCase", () => {
       delete: vi.fn().mockResolvedValue(undefined),
     };
 
+    vanRepository = {
+      findById: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      listAll: vi.fn(),
+      listDriverVans: vi.fn().mockResolvedValue([]), // sem vans, por padrão
+      delete: vi.fn(),
+    };
+
     sut = DeleteUserUseCase.create(
       userRepository,
       driverRepository,
       studentRepository,
+      vanRepository,
     );
   });
 
-  it("deve deletar um motorista e seu registro de Driver correspondente", async () => {
+  it("deve deletar um motorista sem vans e seu registro de Driver correspondente", async () => {
     userRepository.findById = vi.fn().mockResolvedValue(driverUser);
     const driverResult = Driver.create({
       userId: driverUser.id,
@@ -89,7 +102,28 @@ describe("DeleteUserUseCase", () => {
     expect(userRepository.delete).toHaveBeenCalledWith(driverUser.id);
   });
 
-  it("deve deletar um aluno e seu registro de Student correspondente", async () => {
+  it("deve rejeitar deletar motorista que ainda possui vans cadastradas", async () => {
+    userRepository.findById = vi.fn().mockResolvedValue(driverUser);
+
+    const vanResult = Van.create({
+      model: "Sprinter",
+      year: 2022,
+      period: "MANHA",
+      destiny: "Colégio X",
+      capacity: 15,
+      driverId: driverUser.id,
+    });
+    if (vanResult.isLeft()) throw new Error("Falha ao montar fixture de van");
+    vanRepository.listDriverVans = vi.fn().mockResolvedValue([vanResult.value]);
+
+    const result = await sut.execute({ id: driverUser.id });
+
+    expect(result.isLeft()).toBe(true);
+    expect(driverRepository.delete).not.toHaveBeenCalled();
+    expect(userRepository.delete).not.toHaveBeenCalled();
+  });
+
+  it("deve deletar um aluno e seu registro de Student correspondente, sem checar vans", async () => {
     userRepository.findById = vi.fn().mockResolvedValue(studentUser);
     const studentResult = Student.create({
       userId: studentUser.id,
@@ -109,6 +143,7 @@ describe("DeleteUserUseCase", () => {
     );
     expect(driverRepository.delete).not.toHaveBeenCalled();
     expect(userRepository.delete).toHaveBeenCalledWith(studentUser.id);
+    expect(vanRepository.listDriverVans).not.toHaveBeenCalled();
   });
 
   it("deve rejeitar quando o usuário não existe", async () => {

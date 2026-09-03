@@ -29,6 +29,9 @@ export class PrismaRouteRepository implements IRouteRepository {
   async delete(id: string): Promise<void> {
     await prismaClient.routeModel.delete({ where: { id } });
   }
+  async deleteByVanId(vanId: string): Promise<void> {
+    await prismaClient.routeModel.deleteMany({ where: { vanId } });
+  }
 
   private toDomain(row: {
     id: string;

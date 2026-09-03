@@ -63,25 +63,52 @@ export class OsrmRouteCalculatorService implements IRouteCalculatorService {
   private async fetchRoute(
     points: OsrmPoint[],
   ): Promise<{ distanceKm: number; durationMin: number }> {
-    const coordinatesParam = points.map((p) => `${p.long}, ${p.lat}`).join(";");
+    const coordinatesParam = points.map((p) => `${p.long},${p.lat}`).join(";");
     const url = `${OSRM_BASE_URL}/route/v1/driving/${coordinatesParam}?overview=false`;
 
-    const response = await fetch(url);
+    try {
+      const response = await fetch(url);
 
-    if (!response.ok) {
-      throw new Error(`Falha ao consultar OSRM: ${response.status}`);
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(
+          `Falha ao consultar OSRM: ${response.status} - ${body}`,
+        );
+      }
+
+      const data = await response.json();
+      const route = data.routes?.[0];
+
+      if (!route) {
+        throw new Error("OSRM não retornou nenhuma rota válida");
+      }
+
+      return {
+        distanceKm: route.distance / 1000,
+        durationMin: route.duration / 60,
+      };
+    } catch (error) {
+      // fallback: se o OSRM falhar por qualquer motivo (rede, rate limit, indisponibilidade),
+      // calcula a distância via Haversine para não derrubar a funcionalidade inteira
+      console.error("OSRM indisponível, usando fallback Haversine:", error);
+      return this.haversineFallback(points);
     }
-
-    const data = await response.json();
-    const route = data.routes?.[0];
-
-    if (!route) {
-      throw new Error("OSRM não retornou nenhuma rota válida");
+  }
+  private haversineFallback(points: OsrmPoint[]): {
+    distanceKm: number;
+    durationMin: number;
+  } {
+    let totalDistance = 0;
+    for (let i = 1; i < points.length; i++) {
+      const previous = points[i - 1];
+      const current = points[i];
+      if (!previous || !current) continue;
+      totalDistance += this.haversineDistance(previous, current);
     }
-
+    const AVERAGE_SPEED_KMH = 30;
     return {
-      distanceKm: route.distance / 1000, // OSRM retorna em metros
-      durationMin: route.duration / 60, // OSRM retorna em segundos
+      distanceKm: totalDistance,
+      durationMin: (totalDistance / AVERAGE_SPEED_KMH) * 60,
     };
   }
   private haversineDistance(a: OsrmPoint, b: OsrmPoint): number {

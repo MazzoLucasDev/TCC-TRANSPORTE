@@ -5,6 +5,7 @@ import { left, right, type Either } from "../../domain/shared/Either.js";
 import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
 import type { UseCase } from "../useCase.js";
 import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
+import type { IRouteRepository } from "../../domain/repositories/IRouteRepository.js";
 
 export type DeleteVanInputDto = {
   id: string;
@@ -24,13 +25,19 @@ export class DeleteVanUseCase implements UseCase<
   private constructor(
     private readonly vanRepository: IVanRepository,
     private readonly studentRepository: IStudentRepository,
+    private readonly routeRepository: IRouteRepository,
   ) {}
 
   public static create(
     vanRepository: IVanRepository,
     studentRepository: IStudentRepository,
+    routeRepository: IRouteRepository,
   ) {
-    return new DeleteVanUseCase(vanRepository, studentRepository);
+    return new DeleteVanUseCase(
+      vanRepository,
+      studentRepository,
+      routeRepository,
+    );
   }
 
   public async execute(
@@ -47,6 +54,8 @@ export class DeleteVanUseCase implements UseCase<
     for (const student of studentsInVan) {
       await this.studentRepository.update(student.unlinkFromVan());
     }
+
+    await this.routeRepository.deleteByVanId(input.id);
 
     await this.vanRepository.delete(input.id);
 

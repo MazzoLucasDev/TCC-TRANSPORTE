@@ -52,7 +52,7 @@ import { RouteController } from "../infra/http/controllers/RouteController.js";
 
 // Rotas
 import { buildRoutes } from "../infra/http/routes.js";
-import { OsrmRouteCalculatorService } from "../infra/services/OSRMRouteCalculatorService.js";
+import { OsrmRouteCalculatorService } from "../infra/services/OsrmRouteCalculatorService.js";
 
 function assertEnv(name: string): string {
   const value = process.env[name];
@@ -95,6 +95,7 @@ function bootstrap() {
     userRepository,
     driverRepository,
     studentRepository,
+    vanRepository,
   );
 
   // Use Cases - Van
@@ -107,6 +108,7 @@ function bootstrap() {
   const deleteVanUseCase = DeleteVanUseCase.create(
     vanRepository,
     studentRepository,
+    routeRepository,
   );
 
   // Use Cases - Student

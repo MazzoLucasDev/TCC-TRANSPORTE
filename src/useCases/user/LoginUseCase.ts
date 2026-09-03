@@ -20,8 +20,8 @@ export type LoginOutputDto = {
     id: string;
     name: string;
     userType: string;
+    roleId: string;
   };
-  roleId: string;
 };
 
 export type LoginError = InvalidCredentialsError;
@@ -94,8 +94,8 @@ export class LoginUseCase implements UseCase<
         id: user.id,
         name: user.name.value,
         userType: user.userType.value,
+        roleId,
       },
-      roleId,
     };
   }
 }

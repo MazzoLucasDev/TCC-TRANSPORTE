@@ -6,4 +6,5 @@ export interface IRouteRepository {
   create(route: Route): Promise<void>;
   listAll(): Promise<Route[]>;
   delete(id: string): Promise<void>;
+  deleteByVanId(vanId: string): Promise<void>;
 }
