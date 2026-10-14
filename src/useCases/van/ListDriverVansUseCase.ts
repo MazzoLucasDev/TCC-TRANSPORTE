@@ -7,7 +7,7 @@ export type ListDriverVansInputDto = {
 };
 
 export type ListDriverVansOuputDto = {
-  vansProps: Array<{
+  vans: Array<{
     id: string;
     model: string;
     year: number;
@@ -35,7 +35,7 @@ export class ListDriverVansUseCase implements UseCase<
 
   private presentOutput(vans: Van[]): ListDriverVansOuputDto {
     return {
-      vansProps: vans.map((van) => ({
+      vans: vans.map((van) => ({
         id: van.id,
         model: van.model.value,
         year: van.year.value,
