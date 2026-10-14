@@ -10,6 +10,7 @@ import { NotVanOwnerError } from "../../../useCases/shared/NotVanOwnerError.js";
 import type { UpdateStudentUseCase } from "../../../useCases/student/UpdateStudentUseCase.js";
 import type { DeleteStudentUseCase } from "../../../useCases/student/DeleteStudentUseCase.js";
 import { NotStudentOwnerError } from "../../../useCases/shared/NotStudentOwnerError.js";
+import type { GetStudentSummaryUseCase } from "../../../useCases/student/GetStudentSummaryUseCase.js";
 
 export class StudentController {
   constructor(
@@ -20,6 +21,7 @@ export class StudentController {
     private readonly listVanStudentUseCase: ListVanStudentUseCase,
     private readonly registerAbsenceUseCase: RegisterAbsenceUseCase,
     private readonly listConfirmedAttendanceUseCase: ListConfirmedAttendanceUseCase,
+    private readonly getStudentSummaryUseCase: GetStudentSummaryUseCase,
   ) {}
 
   async link(req: AuthenticatedRequest, res: Response): Promise<Response> {
@@ -128,5 +130,22 @@ export class StudentController {
       date,
     });
     return res.status(200).json(result);
+  }
+  async getSummary(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<Response> {
+    const studentId = req.params.studentId;
+    if (typeof studentId !== "string" || studentId.length === 0) {
+      return res.status(400).json({ error: "studentId é obrigatório" });
+    }
+
+    const result = await this.getStudentSummaryUseCase.execute({ studentId });
+
+    if (result.isLeft()) {
+      return res.status(404).json({ error: result.value.message });
+    }
+
+    return res.status(200).json(result.value);
   }
 }

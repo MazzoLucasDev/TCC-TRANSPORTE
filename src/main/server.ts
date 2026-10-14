@@ -53,6 +53,7 @@ import { RouteController } from "../infra/http/controllers/RouteController.js";
 // Rotas
 import { buildRoutes } from "../infra/http/routes.js";
 import { OsrmRouteCalculatorService } from "../infra/services/OsrmRouteCalculatorService.js";
+import { GetStudentSummaryUseCase } from "../useCases/student/GetStudentSummaryUseCase.js";
 
 function assertEnv(name: string): string {
   const value = process.env[name];
@@ -122,10 +123,17 @@ function bootstrap() {
   );
   const updateStudentUseCase = UpdateStudentUseCase.create(studentRepository);
   const deleteStudentUseCase = DeleteStudentUseCase.create(studentRepository);
-  const listVanStudentUseCase = ListVanStudentUseCase.create(studentRepository);
+  const listVanStudentUseCase = ListVanStudentUseCase.create(
+    studentRepository,
+    userRepository,
+  );
   const registerAbsenceUseCase = RegisterAbsenceUseCase.create(
     attendanceRepository,
     studentRepository,
+  );
+  const getStudentSummaryUseCase = GetStudentSummaryUseCase.create(
+    studentRepository,
+    userRepository,
   );
 
   // Use Cases - Driver
@@ -166,6 +174,7 @@ function bootstrap() {
     listVanStudentUseCase,
     registerAbsenceUseCase,
     listConfirmedAttendanceUseCase,
+    getStudentSummaryUseCase,
   );
   const driverController = new DriverController(
     updateDriverUseCase,

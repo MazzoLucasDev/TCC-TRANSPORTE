@@ -62,6 +62,9 @@ export function buildRoutes(
   router.get("/students/van/:vanId", authenticate, (req, res) =>
     studentController.listByVan(req, res),
   );
+  router.get("/students/:studentId", authenticate, requireDriver, (req, res) =>
+    studentController.getSummary(req, res),
+  );
   router.post("/attendance/absence", authenticate, (req, res) =>
     studentController.registerAbsence(req, res),
   );
