@@ -5,14 +5,19 @@ import type { IVanRepository } from "../../domain/repositories/IVanRepository.js
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { IAttendanceRepository } from "../../domain/repositories/IAttendanceRepository.js";
 import type { IRouteRepository } from "../../domain/repositories/IRouteRepository.js";
+import type { IRouteCalculatorService } from "../../domain/services/IRouteCalculatorService.js";
 import { Van } from "../../domain/entities/van/Van.js";
 import { Student } from "../../domain/entities/student/Student.js";
+import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
+import type { IUserRepository } from "../../domain/repositories/IUserRepository";
+import { User } from "../../domain/entities/user/User";
 
 describe("GenerateRouteComparisonUseCase", () => {
   let vanRepository: IVanRepository;
   let studentRepository: IStudentRepository;
   let attendanceRepository: IAttendanceRepository;
   let routeRepository: IRouteRepository;
+  let userRepository: IUserRepository;
   let sut: GenerateRouteComparisonUseCase;
   let van: Van;
 
@@ -77,6 +82,25 @@ describe("GenerateRouteComparisonUseCase", () => {
       create: vi.fn().mockResolvedValue(undefined),
       listAll: vi.fn(),
       delete: vi.fn(),
+      deleteByVanId: vi.fn(),
+    };
+
+    userRepository = {
+      findById: vi.fn().mockResolvedValue(
+        User.reconstitute({
+          id: "user-x",
+          name: "Ana Aluna",
+          email: "ana@email.com",
+          hashedPassword: "hashed-123",
+          phone: "41999999999",
+          userType: "ALUNO",
+        }),
+      ),
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      listAll: vi.fn(),
+      delete: vi.fn(),
     };
 
     sut = GenerateRouteComparisonUseCase.create(
@@ -84,7 +108,8 @@ describe("GenerateRouteComparisonUseCase", () => {
       studentRepository,
       attendanceRepository,
       routeRepository,
-      new HaversineRouteCalculatorService(), // implementação real, não mock — queremos testar o cálculo de verdade
+      new HaversineRouteCalculatorService(),
+      userRepository,
     );
   });
 
@@ -92,6 +117,7 @@ describe("GenerateRouteComparisonUseCase", () => {
     vanRepository.findById = vi.fn().mockResolvedValue(null);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: "van-inexistente",
       date: "2026-07-20",
       driverLocation: origin,
@@ -104,6 +130,7 @@ describe("GenerateRouteComparisonUseCase", () => {
     studentRepository.listByVanId = vi.fn().mockResolvedValue([]);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -122,6 +149,7 @@ describe("GenerateRouteComparisonUseCase", () => {
       .mockResolvedValue([studentFar, studentNear]);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -147,6 +175,7 @@ describe("GenerateRouteComparisonUseCase", () => {
       .mockResolvedValue([studentFar, studentNear]);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -170,6 +199,7 @@ describe("GenerateRouteComparisonUseCase", () => {
     studentRepository.listByVanId = vi.fn().mockResolvedValue([s1, s2, s3]);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -205,6 +235,7 @@ describe("GenerateRouteComparisonUseCase", () => {
       .mockResolvedValue([attendanceResult.value]);
 
     const result = await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -222,6 +253,7 @@ describe("GenerateRouteComparisonUseCase", () => {
     studentRepository.listByVanId = vi.fn().mockResolvedValue([s1]);
 
     await sut.execute({
+      requesterId: "driver-1",
       vanId: van.id,
       date: "2026-07-20",
       driverLocation: origin,
@@ -236,5 +268,205 @@ describe("GenerateRouteComparisonUseCase", () => {
 
     expect(types).toContain("SIMPLE");
     expect(types).toContain("OPTIMIZED");
+  });
+
+  it("deve devolver as paradas com nome e coordenadas, na ordem de cada rota", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi
+      .fn()
+      .mockResolvedValue([studentFar, studentNear]);
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+    });
+
+    expect(result.isRight()).toBe(true);
+    if (result.isRight()) {
+      expect(result.value.optimizedRoute.stops.map((s) => s.studentId)).toEqual(
+        [studentNear.id, studentFar.id],
+      );
+      expect(result.value.optimizedRoute.stops[0]).toEqual({
+        studentId: studentNear.id,
+        name: "Ana Aluna",
+        lat: -25.43,
+        long: -49.275,
+      });
+    }
+  });
+
+  it("deve devolver o traçado e o indicador de aproximação nas duas rotas", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi
+      .fn()
+      .mockResolvedValue([studentFar, studentNear]);
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+    });
+
+    expect(result.isRight()).toBe(true);
+    if (result.isRight()) {
+      const { simpleRoute, optimizedRoute } = result.value;
+      // origem + 2 paradas, na ordem de cada rota
+      expect(simpleRoute.geometry).toEqual([
+        origin,
+        { lat: -25.45, long: -49.3 },
+        { lat: -25.43, long: -49.275 },
+      ]);
+      expect(optimizedRoute.geometry).toEqual([
+        origin,
+        { lat: -25.43, long: -49.275 },
+        { lat: -25.45, long: -49.3 },
+      ]);
+      // o calculador Haversine só consegue traçar linha reta
+      expect(simpleRoute.approximate).toBe(true);
+      expect(optimizedRoute.approximate).toBe(true);
+    }
+  });
+
+  it("deve ignorar no recálculo os alunos já visitados", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi
+      .fn()
+      .mockResolvedValue([studentFar, studentNear]);
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+      visitedStudentIds: [studentNear.id],
+    });
+
+    expect(result.isRight()).toBe(true);
+    if (result.isRight()) {
+      expect(result.value.simpleRoute.studentOrder).toEqual([studentFar.id]);
+      expect(result.value.optimizedRoute.studentOrder).toEqual([studentFar.id]);
+      expect(result.value.optimizedRoute.geometry).toHaveLength(2);
+    }
+  });
+
+  it("deve rejeitar o recálculo quando todos os alunos já foram visitados", async () => {
+    const student = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi.fn().mockResolvedValue([student]);
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+      visitedStudentIds: [student.id],
+    });
+
+    expect(result.isLeft()).toBe(true);
+    expect(routeRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("não deve gravar rotas quando persist é false (recálculo automático)", async () => {
+    const student = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi.fn().mockResolvedValue([student]);
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+      persist: false,
+    });
+
+    expect(result.isRight()).toBe(true);
+    expect(routeRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("deve repassar ao calculador só as paradas restantes e devolver o traçado dele sem alterar", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
+    studentRepository.listByVanId = vi
+      .fn()
+      .mockResolvedValue([studentFar, studentNear]);
+
+    const fake = {
+      order: [studentFar.id],
+      distanceKm: 1.5,
+      durationMin: 4,
+      geometry: [
+        { lat: -25.4284, long: -49.2733 },
+        { lat: -25.44, long: -49.29 },
+        { lat: -25.45, long: -49.3 },
+      ],
+      approximate: false,
+    };
+    const calculator: IRouteCalculatorService = {
+      calculateFixedOrder: vi.fn().mockResolvedValue(fake),
+      calculateOptimized: vi.fn().mockResolvedValue(fake),
+    };
+    sut = GenerateRouteComparisonUseCase.create(
+      vanRepository,
+      studentRepository,
+      attendanceRepository,
+      routeRepository,
+      calculator,
+      userRepository,
+    );
+
+    const result = await sut.execute({
+      requesterId: "driver-1",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+      visitedStudentIds: [studentNear.id],
+    });
+
+    const expectedPoints = [
+      { studentId: studentFar.id, lat: -25.45, long: -49.3 },
+    ];
+    expect(calculator.calculateFixedOrder).toHaveBeenCalledWith(
+      origin,
+      expectedPoints,
+    );
+    expect(calculator.calculateOptimized).toHaveBeenCalledWith(
+      origin,
+      expectedPoints,
+    );
+    expect(result.isRight()).toBe(true);
+    if (result.isRight()) {
+      expect(result.value.optimizedRoute.geometry).toEqual(fake.geometry);
+      expect(result.value.optimizedRoute.approximate).toBe(false);
+    }
+  });
+
+  it("deve rejeitar quando quem pede não é o motorista dono da van", async () => {
+    const result = await sut.execute({
+      requesterId: "outro-motorista",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+    });
+
+    expect(result.isLeft()).toBe(true);
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(NotVanOwnerError);
+    }
+  });
+
+  it("não deve consultar alunos nem gravar rotas quando o solicitante não é o dono", async () => {
+    await sut.execute({
+      requesterId: "outro-motorista",
+      vanId: van.id,
+      date: "2026-07-20",
+      driverLocation: origin,
+    });
+
+    expect(studentRepository.listByVanId).not.toHaveBeenCalled();
+    expect(routeRepository.create).not.toHaveBeenCalled();
   });
 });

@@ -4,6 +4,8 @@ import type { IAttendanceRepository } from "../../domain/repositories/IAttendanc
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import { Student } from "../../domain/entities/student/Student.js";
 import { Attendance } from "../../domain/entities/attendance/Attendance.js";
+import { NotStudentOwnerError } from "../shared/NotStudentOwnerError.js";
+import { StudentNotFoundError } from "./errors/StudentNotFoundError.js";
 
 describe("RegisterAbsenceUseCase", () => {
   let attendanceRepository: IAttendanceRepository;
@@ -49,6 +51,7 @@ describe("RegisterAbsenceUseCase", () => {
   it("deve criar um novo registro de ausência quando não existe nenhum", async () => {
     const result = await sut.execute({
       studentId: student.id,
+      requesterId: "user-1",
       date: "2026-07-20",
     });
 
@@ -74,6 +77,7 @@ describe("RegisterAbsenceUseCase", () => {
 
     const result = await sut.execute({
       studentId: student.id,
+      requesterId: "user-1",
       date: "2026-07-20",
     });
 
@@ -90,16 +94,46 @@ describe("RegisterAbsenceUseCase", () => {
 
     const result = await sut.execute({
       studentId: "inexistente",
+      requesterId: "user-1",
       date: "2026-07-20",
     });
 
     expect(result.isLeft()).toBe(true);
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(StudentNotFoundError);
+    }
     expect(attendanceRepository.create).not.toHaveBeenCalled();
+  });
+
+  it("deve rejeitar quando quem pede não é o dono do aluno", async () => {
+    const result = await sut.execute({
+      studentId: student.id,
+      requesterId: "outro-usuario",
+      date: "2026-07-20",
+    });
+
+    expect(result.isLeft()).toBe(true);
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(NotStudentOwnerError);
+    }
+  });
+
+  it("não deve gravar nem alterar nada quando o solicitante não é o dono", async () => {
+    await sut.execute({
+      studentId: student.id,
+      requesterId: "outro-usuario",
+      date: "2026-07-20",
+    });
+
+    expect(attendanceRepository.findByStudentAndDate).not.toHaveBeenCalled();
+    expect(attendanceRepository.create).not.toHaveBeenCalled();
+    expect(attendanceRepository.update).not.toHaveBeenCalled();
   });
 
   it("deve rejeitar data inválida", async () => {
     const result = await sut.execute({
       studentId: student.id,
+      requesterId: "user-1",
       date: "data-invalida",
     });
 

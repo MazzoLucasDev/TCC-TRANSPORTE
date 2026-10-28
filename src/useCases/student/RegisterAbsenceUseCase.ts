@@ -5,11 +5,13 @@ import {
 import type { IAttendanceRepository } from "../../domain/repositories/IAttendanceRepository.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
+import { NotStudentOwnerError } from "../shared/NotStudentOwnerError.js";
 import type { UseCase } from "../useCase.js";
 import { StudentNotFoundError } from "./errors/StudentNotFoundError.js";
 
 export type RegisterAbsenceInputDto = {
   studentId: string;
+  requesterId: string;
   date: string;
 };
 
@@ -20,7 +22,10 @@ export type RegisterAbsenceOutputDto = {
   status: string;
 };
 
-export type RegisterAbsenceError = StudentNotFoundError | AttendanceError;
+export type RegisterAbsenceError =
+  | StudentNotFoundError
+  | NotStudentOwnerError
+  | AttendanceError;
 
 export class RegisterAbsenceUseCase implements UseCase<
   RegisterAbsenceInputDto,
@@ -44,6 +49,9 @@ export class RegisterAbsenceUseCase implements UseCase<
     const student = await this.studentRepository.findById(input.studentId);
     if (!student) {
       return left(new StudentNotFoundError(input.studentId));
+    }
+    if (student.userId !== input.requesterId) {
+      return left(new NotStudentOwnerError(input.studentId));
     }
 
     const parsedDate = new Date(input.date);

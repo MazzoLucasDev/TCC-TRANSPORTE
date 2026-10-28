@@ -11,6 +11,9 @@ import type { UpdateStudentUseCase } from "../../../useCases/student/UpdateStude
 import type { DeleteStudentUseCase } from "../../../useCases/student/DeleteStudentUseCase.js";
 import { NotStudentOwnerError } from "../../../useCases/shared/NotStudentOwnerError.js";
 import type { GetStudentSummaryUseCase } from "../../../useCases/student/GetStudentSummaryUseCase.js";
+import { NotVanMemberError } from "../../../useCases/shared/NotVanMemberError.js";
+import type { GetMyStudentProfileUseCase } from "../../../useCases/student/GetMyStudentProfileUseCase.js";
+import type { RegisterPresenceUseCase } from "../../../useCases/student/RegisterPresenceUseCase.js";
 
 export class StudentController {
   constructor(
@@ -22,6 +25,8 @@ export class StudentController {
     private readonly registerAbsenceUseCase: RegisterAbsenceUseCase,
     private readonly listConfirmedAttendanceUseCase: ListConfirmedAttendanceUseCase,
     private readonly getStudentSummaryUseCase: GetStudentSummaryUseCase,
+    private readonly getMyStudentProfileUseCase: GetMyStudentProfileUseCase,
+    private readonly registerPresenceUseCase: RegisterPresenceUseCase,
   ) {}
 
   async link(req: AuthenticatedRequest, res: Response): Promise<Response> {
@@ -58,9 +63,9 @@ export class StudentController {
     }
 
     const result = await this.updateStudentUseCase.execute({
+      ...req.body,
       studentId,
       requesterId: req.userId!,
-      ...req.body,
     });
 
     if (result.isLeft()) {
@@ -96,18 +101,31 @@ export class StudentController {
       return res.status(400).json({ error: "VanId é obrigatório!!!" });
     }
 
-    const result = await this.listVanStudentUseCase.execute({ vanId });
-    return res.status(200).json(result);
+    const result = await this.listVanStudentUseCase.execute({
+      requesterId: req.userId!,
+      vanId,
+    });
+
+    if (result.isLeft()) {
+      const status = result.value instanceof NotVanMemberError ? 403 : 404;
+      return res.status(status).json({ error: result.value.message });
+    }
+
+    return res.status(200).json(result.value);
   }
 
   async registerAbsence(
     req: AuthenticatedRequest,
     res: Response,
   ): Promise<Response> {
-    const result = await this.registerAbsenceUseCase.execute(req.body);
+    const result = await this.registerAbsenceUseCase.execute({
+      ...req.body,
+      requesterId: req.userId!,
+    });
 
     if (result.isLeft()) {
-      return res.status(400).json({ error: result.value.message });
+      const status = result.value instanceof NotStudentOwnerError ? 403 : 400;
+      return res.status(status).json({ error: result.value.message });
     }
 
     return res.status(200).json(result.value);
@@ -126,10 +144,15 @@ export class StudentController {
     }
 
     const result = await this.listConfirmedAttendanceUseCase.execute({
+      requesterId: req.userId!,
       vanId,
       date,
     });
-    return res.status(200).json(result);
+    if (result.isLeft()) {
+      const status = result.value instanceof NotVanOwnerError ? 403 : 400;
+      return res.status(status).json({ error: result.value.message });
+    }
+    return res.status(200).json(result.value);
   }
   async getSummary(
     req: AuthenticatedRequest,
@@ -146,6 +169,38 @@ export class StudentController {
       return res.status(404).json({ error: result.value.message });
     }
 
+    return res.status(200).json(result.value);
+  }
+  async getMe(req: AuthenticatedRequest, res: Response): Promise<Response> {
+    const date = req.query.date;
+    if (typeof date !== "string") {
+      return res.status(400).json({ error: "date é obrigatório!" });
+    }
+
+    const result = await this.getMyStudentProfileUseCase.execute({
+      requesterId: req.userId!,
+      date,
+    });
+
+    if (result.isLeft()) {
+      return res.status(400).json({ error: result.value.message });
+    }
+    return res.status(200).json(result.value);
+  }
+
+  async registerPresence(
+    req: AuthenticatedRequest,
+    res: Response,
+  ): Promise<Response> {
+    const result = await this.registerPresenceUseCase.execute({
+      ...req.body,
+      requesterId: req.userId!,
+    });
+
+    if (result.isLeft()) {
+      const status = result.value instanceof NotStudentOwnerError ? 403 : 400;
+      return res.status(status).json({ error: result.value.message });
+    }
     return res.status(200).json(result.value);
   }
 }

@@ -53,6 +53,9 @@ export function buildRoutes(
   router.post("/students/unlink", authenticate, requireDriver, (req, res) =>
     studentController.unlink(req, res),
   );
+  router.get("/students/me", authenticate, (req, res) =>
+    studentController.getMe(req, res),
+  );
   router.patch("/students/:studentId", authenticate, (req, res) =>
     studentController.update(req, res),
   );
@@ -70,6 +73,9 @@ export function buildRoutes(
   );
   router.get("/attendance/confirmed", authenticate, (req, res) =>
     studentController.listConfirmed(req, res),
+  );
+  router.post("/attendance/presence", authenticate, (req, res) =>
+    studentController.registerPresence(req, res),
   );
 
   // driver

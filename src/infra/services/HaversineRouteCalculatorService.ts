@@ -17,6 +17,8 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
       order,
       distanceKm,
       durationMin: this.distanceToMinutes(distanceKm),
+      geometry: [origin, ...points.map((p) => ({ lat: p.lat, long: p.long }))],
+      approximate: true,
     };
   }
   async calculateOptimized(
@@ -25,6 +27,7 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
   ): Promise<RouteCalculatorResult> {
     const remaining = [...points];
     const order: string[] = [];
+    const ordered: RoutePoint[] = [];
     let currentPoint = origin;
     let totalDistance = 0;
 
@@ -53,6 +56,7 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
       }
 
       order.push(nearest.studentId);
+      ordered.push(nearest);
       totalDistance += nearestDistance;
       currentPoint = nearest;
     }
@@ -60,6 +64,8 @@ export class HaversineRouteCalculatorService implements IRouteCalculatorService 
       order,
       distanceKm: totalDistance,
       durationMin: this.distanceToMinutes(totalDistance),
+      geometry: [origin, ...ordered.map((p) => ({ lat: p.lat, long: p.long }))],
+      approximate: true,
     };
   }
 

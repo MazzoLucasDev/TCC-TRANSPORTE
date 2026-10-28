@@ -16,7 +16,10 @@ export class VanController {
   ) {}
 
   async create(req: AuthenticatedRequest, res: Response): Promise<Response> {
-    const result = await this.createVanUseCase.execute(req.body);
+    const result = await this.createVanUseCase.execute({
+      ...req.body,
+      driverId: req.userId!,
+    });
 
     if (result.isLeft()) {
       return res.status(400).json({ error: result.value.message });
@@ -31,9 +34,9 @@ export class VanController {
       return res.status(400).json({ error: "VanId é obrigatório!" });
     }
     const result = await this.updateVanUseCase.execute({
+      ...req.body,
       vanId,
       requesterId: req.userId!,
-      ...req.body,
     });
 
     if (result.isLeft()) {
@@ -70,6 +73,11 @@ export class VanController {
     const driverId = req.params.driverId;
     if (typeof driverId !== "string" || driverId.length === 0) {
       return res.status(400).json({ error: "driverId é obrigatório!!!" });
+    }
+    if (driverId !== req.userId) {
+      return res
+        .status(403)
+        .json({ error: "Você só pode listar as suas vans." });
     }
 
     const result = await this.listDriverVansUseCase.execute({ driverId });

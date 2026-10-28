@@ -1,10 +1,15 @@
 import type { Student } from "../../domain/entities/student/Student.js";
 import type { IAttendanceRepository } from "../../domain/repositories/IAttendanceRepository.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
+import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";
+import { left, right, type Either } from "../../domain/shared/Either.js";
+import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
+import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
 import type { UseCase } from "../useCase.js";
 
 export type ListConfirmedAttendanceInputDto = {
   vanId: string;
+  requesterId: string;
   date: string;
 };
 
@@ -15,27 +20,42 @@ export type ListConfirmedAttendanceOutputDto = {
   }>;
 };
 
+export type ListConfirmedAttendanceError = VanNotFoundError | NotVanOwnerError;
+
 export class ListConfirmedAttendanceUseCase implements UseCase<
   ListConfirmedAttendanceInputDto,
-  ListConfirmedAttendanceOutputDto
+  Either<ListConfirmedAttendanceError, ListConfirmedAttendanceOutputDto>
 > {
   private constructor(
     private readonly studentRepository: IStudentRepository,
     private readonly attendanceRepository: IAttendanceRepository,
+    private readonly vanRepository: IVanRepository,
   ) {}
 
   public static create(
     studentRepository: IStudentRepository,
     attendanceRepository: IAttendanceRepository,
+    vanRepository: IVanRepository,
   ) {
     return new ListConfirmedAttendanceUseCase(
       studentRepository,
       attendanceRepository,
+      vanRepository,
     );
   }
   public async execute(
     input: ListConfirmedAttendanceInputDto,
-  ): Promise<ListConfirmedAttendanceOutputDto> {
+  ): Promise<
+    Either<ListConfirmedAttendanceError, ListConfirmedAttendanceOutputDto>
+  > {
+    const van = await this.vanRepository.findById(input.vanId);
+    if (!van) {
+      return left(new VanNotFoundError(input.vanId));
+    }
+    if (van.driverId !== input.requesterId) {
+      return left(new NotVanOwnerError(input.vanId));
+    }
+
     const allStudentInVan = await this.studentRepository.listByVanId(
       input.vanId,
     );
@@ -55,7 +75,7 @@ export class ListConfirmedAttendanceUseCase implements UseCase<
     const confirmedStudents = allStudentInVan.filter(
       (student) => !absentStudentIds.has(student.id),
     );
-    return this.presentOutput(confirmedStudents);
+    return right(this.presentOutput(confirmedStudents));
   }
 
   private presentOutput(students: Student[]): ListConfirmedAttendanceOutputDto {

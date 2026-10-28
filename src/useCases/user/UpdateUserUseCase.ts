@@ -6,7 +6,7 @@ import { Phone } from "../../domain/entities/user/valueObjects/Phone.js";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
 import type { UseCase } from "../useCase.js";
-import { UserNotFoundError } from "./errors/UserNotFoundError.js";
+import { UserNotFoundError } from "../shared/UserNotFoundError.js";
 
 export type UpdateUserInputDto = {
   userId: string;

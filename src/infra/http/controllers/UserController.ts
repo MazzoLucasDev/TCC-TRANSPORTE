@@ -29,8 +29,8 @@ export class UserController {
       return res.status(400).json({ error: "UserId é obrigatório!" });
     }
     const result = await this.updateUserUseCase.execute({
-      userId,
       ...req.body,
+      userId,
     });
 
     if (result.isLeft()) {

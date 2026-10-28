@@ -54,6 +54,8 @@ import { RouteController } from "../infra/http/controllers/RouteController.js";
 import { buildRoutes } from "../infra/http/routes.js";
 import { OsrmRouteCalculatorService } from "../infra/services/OsrmRouteCalculatorService.js";
 import { GetStudentSummaryUseCase } from "../useCases/student/GetStudentSummaryUseCase.js";
+import { GetMyStudentProfileUseCase } from "../useCases/student/GetMyStudentProfileUseCase.js";
+import { RegisterPresenceUseCase } from "../useCases/student/RegisterPresenceUseCase.js";
 
 function assertEnv(name: string): string {
   const value = process.env[name];
@@ -126,6 +128,7 @@ function bootstrap() {
   const listVanStudentUseCase = ListVanStudentUseCase.create(
     studentRepository,
     userRepository,
+    vanRepository,
   );
   const registerAbsenceUseCase = RegisterAbsenceUseCase.create(
     attendanceRepository,
@@ -136,6 +139,18 @@ function bootstrap() {
     userRepository,
   );
 
+  const getMyStudentProfileUseCase = GetMyStudentProfileUseCase.create(
+    studentRepository,
+    userRepository,
+    vanRepository,
+    attendanceRepository,
+  );
+
+  const registerPresenceUseCase = RegisterPresenceUseCase.create(
+    attendanceRepository,
+    studentRepository,
+  );
+
   // Use Cases - Driver
   const updateDriverUseCase = UpdateDriverUseCase.create(driverRepository);
   const deleteDriverUseCase = DeleteDriverUseCase.create(driverRepository);
@@ -144,6 +159,7 @@ function bootstrap() {
   const listConfirmedAttendanceUseCase = ListConfirmedAttendanceUseCase.create(
     studentRepository,
     attendanceRepository,
+    vanRepository,
   );
   const generateRouteComparisonUseCase = GenerateRouteComparisonUseCase.create(
     vanRepository,
@@ -151,6 +167,7 @@ function bootstrap() {
     attendanceRepository,
     routeRepository,
     routeCalculator,
+    userRepository,
   );
 
   // Controllers
@@ -175,6 +192,8 @@ function bootstrap() {
     registerAbsenceUseCase,
     listConfirmedAttendanceUseCase,
     getStudentSummaryUseCase,
+    getMyStudentProfileUseCase,
+    registerPresenceUseCase,
   );
   const driverController = new DriverController(
     updateDriverUseCase,

@@ -36,8 +36,8 @@ describe("ListDriverVansUseCase", () => {
   it("deve listar as vans do motorista", async () => {
     const result = await sut.execute({ driverId: "driver-1" });
 
-    expect(result.vansProps).toHaveLength(2);
-    expect(result.vansProps[0]).toEqual({
+    expect(result.vans).toHaveLength(2);
+    expect(result.vans[0]).toEqual({
       id: expect.any(String),
       model: "Sprinter",
       year: 2022,
@@ -53,7 +53,7 @@ describe("ListDriverVansUseCase", () => {
 
     const result = await sut.execute({ driverId: "driver-sem-vans" });
 
-    expect(result.vansProps).toEqual([]);
+    expect(result.vans).toEqual([]);
   });
 
   it("deve chamar o repository com o driverId correto", async () => {

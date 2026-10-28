@@ -6,7 +6,7 @@ import type { IVanRepository } from "../../domain/repositories/IVanRepository.js
 import { left, right, type Either } from "../../domain/shared/Either.js";
 import type { UseCase } from "../useCase.js";
 import { UserHasActiveVansError } from "./errors/UserHasActiveVansError.js";
-import { UserNotFoundError } from "./errors/UserNotFoundError.js";
+import { UserNotFoundError } from "../shared/UserNotFoundError.js";
 
 export type DeleteUserInputDto = { id: string };
 export type DeleteUserOutputDto = { deleted: boolean };

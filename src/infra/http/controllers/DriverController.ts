@@ -3,6 +3,7 @@ import type { DeleteDriverUseCase } from "../../../useCases/driver/DeleteDriverU
 import type { UpdateDriverUseCase } from "../../../useCases/driver/UpdateDriverUseCase.js";
 import type { AuthenticatedRequest } from "../middlewares/authMiddleware.js";
 import { NotDriverOwnerError } from "../../../useCases/shared/NotDriverOwnerError.js";
+import type { error } from "node:console";
 
 export class DriverController {
   constructor(
@@ -18,14 +19,14 @@ export class DriverController {
     }
 
     const result = await this.updateDriverUseCase.execute({
+      ...req.body,
       driverId,
       requesterId: req.userId!,
-      ...req.body,
     });
 
     if (result.isLeft()) {
       const status = result.value instanceof NotDriverOwnerError ? 403 : 400;
-      return res.status(status).json({ result: result.value.message });
+      return res.status(status).json({ error: result.value.message });
     }
 
     return res.status(200).json(result.value);
@@ -44,7 +45,7 @@ export class DriverController {
 
     if (result.isLeft()) {
       const status = result.value instanceof NotDriverOwnerError ? 403 : 400;
-      return res.status(status).json({ result: result.value.message });
+      return res.status(status).json({ error: result.value.message });
     }
 
     return res.status(200).json(result.value);

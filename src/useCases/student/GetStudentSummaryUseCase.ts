@@ -4,7 +4,7 @@ import type { IStudentRepository } from "../../domain/repositories/IStudentRepos
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
 import type { UseCase } from "../useCase.js";
-import { UserNotFoundError } from "../user/errors/UserNotFoundError.js";
+import { UserNotFoundError } from "../shared/UserNotFoundError.js";
 import { StudentNotFoundError } from "./errors/StudentNotFoundError.js";
 
 export type GetStudentSummaryInputDto = { studentId: string };

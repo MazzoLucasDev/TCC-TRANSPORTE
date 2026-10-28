@@ -1,134 +1,160 @@
 import type {
+  GeoPoint,
   IRouteCalculatorService,
   RouteCalculatorResult,
   RoutePoint,
 } from "../../domain/services/IRouteCalculatorService.js";
 
-const OSRM_BASE_URL = "https://router.project-osrm.org";
-
-type OsrmPoint = { lat: number; long: number };
+const OSRM_BASE_URL = process.env.OSRM_URL ?? "https://router.project-osrm.org";
+const AVERAGE_SPEED_KMH = 30;
+const MIN_INTERVAL_MS = 1100; // servidor público: no máximo 1 requisição por segundo
 
 export class OsrmRouteCalculatorService implements IRouteCalculatorService {
+  private lastCall = 0;
+
   async calculateFixedOrder(
-    origin: { lat: number; long: number },
+    origin: GeoPoint,
     points: RoutePoint[],
   ): Promise<RouteCalculatorResult> {
-    const order = points.map((p) => p.studentId);
-    const coordinates = [origin, ...points];
-
-    const { distanceKm, durationMin } = await this.fetchRoute(coordinates);
-
-    return { order, distanceKm, durationMin };
+    const route = await this.fetchRoute([origin, ...points]);
+    return { order: points.map((p) => p.studentId), ...route };
   }
 
   async calculateOptimized(
-    origin: { lat: number; long: number },
+    origin: GeoPoint,
     points: RoutePoint[],
   ): Promise<RouteCalculatorResult> {
-    const remaining = [...points];
-    const order: string[] = [];
-    const orderedCoordinates: OsrmPoint[] = [origin];
-    let currentPoint: OsrmPoint = origin;
+    const coords: GeoPoint[] = [origin, ...points];
 
-    // 1ª etapa: decide a ORDEM usando Haversine (rápido, sem custo de rede por ponto)
-    while (remaining.length > 0) {
-      const firstPoint = remaining[0];
-      if (!firstPoint) break;
+    // 1ª etapa: vizinho mais próximo usando a distância REAL pelas ruas (matriz do OSRM).
+    // Se o OSRM falhar, usa Haversine só para decidir a ordem.
+    let matrix: number[][] | null = null;
+    try {
+      matrix = await this.fetchDistanceMatrix(coords);
+    } catch (error) {
+      console.error("OSRM (matriz) indisponível, ordem por Haversine:", error);
+    }
+    const distance = (a: number, b: number): number => {
+      if (matrix) return matrix[a]?.[b] ?? Infinity;
+      const pa = coords[a];
+      const pb = coords[b];
+      return pa && pb ? this.haversineDistance(pa, pb) : Infinity;
+    };
 
-      let nearestIndex = 0;
-      let nearestDistance = this.haversineDistance(currentPoint, firstPoint);
+    const indexes = this.nearestNeighbor(coords.length, distance);
+    const ordered: RoutePoint[] = indexes.flatMap((i) => {
+      const point = points[i - 1];
+      return point ? [point] : [];
+    });
 
-      for (let i = 1; i < remaining.length; i++) {
-        const candidate = remaining[i];
-        if (!candidate) continue;
+    // 2ª etapa: trajeto pelas ruas passando pelas paradas na ordem escolhida
+    const route = await this.fetchRoute([origin, ...ordered]);
+    return { order: ordered.map((p) => p.studentId), ...route };
+  }
 
-        const distance = this.haversineDistance(currentPoint, candidate);
-        if (distance < nearestDistance) {
-          nearestDistance = distance;
-          nearestIndex = i;
+  // Heurística do vizinho mais próximo. Índice 0 = origem; 1..n = paradas.
+  private nearestNeighbor(
+    count: number,
+    distance: (a: number, b: number) => number,
+  ): number[] {
+    const remaining = new Set<number>();
+    for (let i = 1; i < count; i++) remaining.add(i);
+    const order: number[] = [];
+    let current = 0;
+
+    while (remaining.size > 0) {
+      let best = -1;
+      let bestDistance = Infinity;
+      for (const candidate of remaining) {
+        const d = distance(current, candidate);
+        if (d < bestDistance) {
+          bestDistance = d;
+          best = candidate;
         }
       }
-      const nearest = remaining.splice(nearestIndex, 1)[0];
-      if (!nearest) break;
-
-      order.push(nearest.studentId);
-      orderedCoordinates.push(nearest);
-      currentPoint = nearest;
+      if (best === -1) best = remaining.values().next().value as number;
+      remaining.delete(best);
+      order.push(best);
+      current = best;
     }
-    const { distanceKm, durationMin } =
-      await this.fetchRoute(orderedCoordinates);
-    return { order, distanceKm, durationMin };
+    return order;
+  }
+
+  private async throttle(): Promise<void> {
+    const wait = MIN_INTERVAL_MS - (Date.now() - this.lastCall);
+    if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+    this.lastCall = Date.now();
+  }
+
+  private async getJson(url: string): Promise<any> {
+    await this.throttle();
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!response.ok) {
+      throw new Error(`OSRM HTTP ${response.status}: ${await response.text()}`);
+    }
+    const data = await response.json();
+    if (data.code !== "Ok") throw new Error(`OSRM ${data.code}`);
+    return data;
+  }
+
+  private async fetchDistanceMatrix(points: GeoPoint[]): Promise<number[][]> {
+    const coordinates = points.map((p) => `${p.long},${p.lat}`).join(";");
+    const data = await this.getJson(
+      `${OSRM_BASE_URL}/table/v1/driving/${coordinates}?annotations=distance`,
+    );
+    return (data.distances as (number | null)[][]).map((row) =>
+      row.map((meters) => (meters == null ? Infinity : meters / 1000)),
+    );
   }
 
   private async fetchRoute(
-    points: OsrmPoint[],
-  ): Promise<{ distanceKm: number; durationMin: number }> {
-    const coordinatesParam = points.map((p) => `${p.long},${p.lat}`).join(";");
-    const url = `${OSRM_BASE_URL}/route/v1/driving/${coordinatesParam}?overview=false`;
-
+    points: GeoPoint[],
+  ): Promise<Omit<RouteCalculatorResult, "order">> {
+    const coordinates = points.map((p) => `${p.long},${p.lat}`).join(";");
     try {
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(
-          `Falha ao consultar OSRM: ${response.status} - ${body}`,
-        );
-      }
-
-      const data = await response.json();
+      const data = await this.getJson(
+        `${OSRM_BASE_URL}/route/v1/driving/${coordinates}?overview=full&geometries=geojson`,
+      );
       const route = data.routes?.[0];
-
-      if (!route) {
-        throw new Error("OSRM não retornou nenhuma rota válida");
-      }
+      if (!route) throw new Error("OSRM não retornou nenhuma rota válida");
 
       return {
         distanceKm: route.distance / 1000,
         durationMin: route.duration / 60,
+        geometry: (route.geometry.coordinates as [number, number][]).map(
+          ([long, lat]) => ({ lat, long }),
+        ),
+        approximate: false,
       };
     } catch (error) {
-      // fallback: se o OSRM falhar por qualquer motivo (rede, rate limit, indisponibilidade),
-      // calcula a distância via Haversine para não derrubar a funcionalidade inteira
-      console.error("OSRM indisponível, usando fallback Haversine:", error);
-      return this.haversineFallback(points);
+      console.error("OSRM indisponível, usando linha reta (Haversine):", error);
+      let total = 0;
+      for (let i = 1; i < points.length; i++) {
+        const a = points[i - 1];
+        const b = points[i];
+        if (a && b) total += this.haversineDistance(a, b);
+      }
+      return {
+        distanceKm: total,
+        durationMin: (total / AVERAGE_SPEED_KMH) * 60,
+        geometry: points,
+        approximate: true,
+      };
     }
   }
-  private haversineFallback(points: OsrmPoint[]): {
-    distanceKm: number;
-    durationMin: number;
-  } {
-    let totalDistance = 0;
-    for (let i = 1; i < points.length; i++) {
-      const previous = points[i - 1];
-      const current = points[i];
-      if (!previous || !current) continue;
-      totalDistance += this.haversineDistance(previous, current);
-    }
-    const AVERAGE_SPEED_KMH = 30;
-    return {
-      distanceKm: totalDistance,
-      durationMin: (totalDistance / AVERAGE_SPEED_KMH) * 60,
-    };
-  }
-  private haversineDistance(a: OsrmPoint, b: OsrmPoint): number {
+
+  private haversineDistance(a: GeoPoint, b: GeoPoint): number {
     const R = 6371;
     const dLat = this.toRad(b.lat - a.lat);
     const dLong = this.toRad(b.long - a.long);
-
-    const sinLat = Math.sin(dLat / 2);
-    const sinLong = Math.sin(dLong / 2);
-
     const h =
-      sinLat * sinLat +
+      Math.sin(dLat / 2) ** 2 +
       Math.cos(this.toRad(a.lat)) *
         Math.cos(this.toRad(b.lat)) *
-        sinLong *
-        sinLong;
-    const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-
-    return R * c;
+        Math.sin(dLong / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
   }
+
   private toRad(degrees: number): number {
     return (degrees * Math.PI) / 180;
   }
