@@ -77,7 +77,7 @@ describe("PrismaStudentRepository (integração)", () => {
     const result = Student.create({
       userId: studentUserId,
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (result.isLeft()) throw new Error("Falha ao montar fixture");
     return result.value;
@@ -91,7 +91,7 @@ describe("PrismaStudentRepository (integração)", () => {
     const found = await sut.findById(student.id);
 
     expect(found).not.toBeNull();
-    expect(found?.collectionPoint.value).toEqual({ lat: -25.42, long: -49.27 });
+    expect(found?.coordinates.value).toEqual({ lat: -25.42, long: -49.27 });
   });
 
   it("deve encontrar um aluno pelo userId", async () => {

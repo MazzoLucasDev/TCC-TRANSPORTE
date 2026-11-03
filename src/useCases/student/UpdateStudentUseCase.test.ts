@@ -14,14 +14,14 @@ describe("UpdateStudentUseCase", () => {
     studentId: "",
     requesterId: STUDENT_USER_ID,
     dateOfBirth: "2010-03-20",
-    collectionPoint: { lat: -25.43, long: -49.28 },
+    coordinates: { lat: -25.43, long: -49.28 },
   };
 
   beforeEach(() => {
     const result = Student.create({
       userId: STUDENT_USER_ID,
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (result.isLeft()) throw new Error("Falha ao montar fixture");
     student = result.value;
@@ -45,7 +45,7 @@ describe("UpdateStudentUseCase", () => {
 
     expect(result.isRight()).toBe(true);
     if (result.isRight()) {
-      expect(result.value.collectionPoint).toEqual({
+      expect(result.value.coordinates).toEqual({
         lat: -25.43,
         long: -49.28,
       });
@@ -74,7 +74,7 @@ describe("UpdateStudentUseCase", () => {
   it("deve rejeitar ponto de coleta inválido", async () => {
     const result = await sut.execute({
       ...validInput,
-      collectionPoint: { lat: 999, long: -49.27 },
+      coordinates: { lat: 999, long: -49.27 },
     });
 
     expect(result.isLeft()).toBe(true);

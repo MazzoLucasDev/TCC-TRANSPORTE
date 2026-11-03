@@ -16,7 +16,7 @@ export type ListConfirmedAttendanceInputDto = {
 export type ListConfirmedAttendanceOutputDto = {
   confirmedStudents: Array<{
     studentId: string;
-    collectionPoint: { lat: number; long: number };
+    coordinates: { lat: number; long: number };
   }>;
 };
 
@@ -82,7 +82,7 @@ export class ListConfirmedAttendanceUseCase implements UseCase<
     return {
       confirmedStudents: students.map((student) => ({
         studentId: student.id,
-        collectionPoint: student.collectionPoint.value,
+        coordinates: student.coordinates.value,
       })),
     };
   }

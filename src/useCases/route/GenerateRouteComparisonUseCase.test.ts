@@ -29,7 +29,7 @@ describe("GenerateRouteComparisonUseCase", () => {
     const result = Student.create({
       userId: "user-x",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat, long },
+      coordinates: { lat, long },
     });
     if (result.isLeft()) throw new Error("Falha ao montar fixture");
     return result.value;

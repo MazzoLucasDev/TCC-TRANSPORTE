@@ -26,7 +26,7 @@ describe("RegisterPresenceUseCase", () => {
     const studentResult = Student.create({
       userId: "user-1",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (studentResult.isLeft()) throw new Error("Falha ao montar fixture");
     student = studentResult.value;
@@ -51,7 +51,10 @@ describe("RegisterPresenceUseCase", () => {
       delete: vi.fn(),
     };
 
-    sut = RegisterPresenceUseCase.create(attendanceRepository, studentRepository);
+    sut = RegisterPresenceUseCase.create(
+      attendanceRepository,
+      studentRepository,
+    );
   });
 
   it("deve desfazer a ausência existente, marcando o aluno como presente", async () => {

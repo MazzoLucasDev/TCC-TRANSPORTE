@@ -63,7 +63,7 @@ describe("CreateUserUseCase", () => {
       phone: "41999999999",
       userType: "ALUNO",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
 
     expect(result.isRight()).toBe(true);
@@ -99,7 +99,7 @@ describe("CreateUserUseCase", () => {
       phone: "41999999999",
       userType: "ALUNO",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
 
     expect(result.isLeft()).toBe(true);
@@ -133,7 +133,7 @@ describe("CreateUserUseCase", () => {
       phone: "41999999999",
       userType: "ALUNO",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
 
     expect(passwordHasher.hash).toHaveBeenCalledWith("Senha123");

@@ -34,7 +34,7 @@ export type CreateUserInputDto = CreateUserBaseFields &
     | {
         userType: "ALUNO";
         dateOfBirth: string;
-        collectionPoint: {
+        coordinates: {
           lat: number;
           long: number;
         };
@@ -124,7 +124,7 @@ export class CreateUserUseCase implements UseCase<
       const studentOrError = Student.create({
         userId: user.id,
         dateOfBirth: input.dateOfBirth,
-        collectionPoint: input.collectionPoint,
+        coordinates: input.coordinates,
       });
       if (studentOrError.isLeft()) {
         return left(studentOrError.value);

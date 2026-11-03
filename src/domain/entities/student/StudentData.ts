@@ -1,7 +1,7 @@
 export interface StudentData {
   userId: string;
   dateOfBirth: string;
-  collectionPoint: {
+  coordinates: {
     lat: number;
     long: number;
   };

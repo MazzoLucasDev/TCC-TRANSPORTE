@@ -128,7 +128,7 @@ describe("DeleteUserUseCase", () => {
     const studentResult = Student.create({
       userId: studentUser.id,
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (studentResult.isLeft()) throw new Error("Falha ao montar fixture");
     studentRepository.findByUserId = vi

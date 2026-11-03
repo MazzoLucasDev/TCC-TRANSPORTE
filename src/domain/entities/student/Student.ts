@@ -1,8 +1,8 @@
 import { left, right, type Either } from "../../shared/Either.js";
-import { InvalidCollectionPointError } from "./errors/InvalidCollectionPointError.js";
+import { InvalidCoordinatesError } from "../../shared/errors/InvalidCoordinatesError.js";
 import { InvalidUserIdError } from "../../shared/errors/InvalidUserIdError.js";
 import type { StudentData } from "./StudentData.js";
-import { CollectionPoint } from "./valueObjects/CollectionPoint.js";
+import { Coordinates } from "../../shared/valueObjects/Coordinates.js";
 import { DateOfBirth } from "../../shared/valueObjects/DateOfBirth.js";
 import type { InvalidDateOfBirthError } from "../../shared/errors/InvalidDateOfBirthError.js";
 
@@ -11,13 +11,13 @@ export type StudentProps = {
   readonly userId: string;
   vanId: string | null;
   dateOfBirth: DateOfBirth;
-  collectionPoint: CollectionPoint;
+  coordinates: Coordinates;
 };
 
 export type StudentError =
   | InvalidUserIdError
   | InvalidDateOfBirthError
-  | InvalidCollectionPointError;
+  | InvalidCoordinatesError;
 
 export class Student {
   private constructor(private readonly props: StudentProps) {
@@ -36,11 +36,9 @@ export class Student {
       return left(dateOfBirthOrError.value);
     }
 
-    const collectionPointOrError = CollectionPoint.create(
-      studentData.collectionPoint,
-    );
-    if (collectionPointOrError.isLeft()) {
-      return left(collectionPointOrError.value);
+    const coordinatesOrError = Coordinates.create(studentData.coordinates);
+    if (coordinatesOrError.isLeft()) {
+      return left(coordinatesOrError.value);
     }
 
     return right(
@@ -48,7 +46,7 @@ export class Student {
         id: crypto.randomUUID(),
         userId: studentData.userId,
         dateOfBirth: dateOfBirthOrError.value,
-        collectionPoint: collectionPointOrError.value,
+        coordinates: coordinatesOrError.value,
         vanId: null,
       }),
     );
@@ -61,8 +59,8 @@ export class Student {
     return this.props.userId;
   }
 
-  get collectionPoint(): CollectionPoint {
-    return this.props.collectionPoint;
+  get coordinates(): Coordinates {
+    return this.props.coordinates;
   }
 
   get vanId(): string | null {
@@ -89,7 +87,7 @@ export class Student {
   }
   withUpdatedDetails(props: {
     dateOfBirth: DateOfBirth;
-    collectionPoint: CollectionPoint;
+    coordinates: Coordinates;
   }): Student {
     return new Student({ ...this.props, ...props });
   }
@@ -105,8 +103,8 @@ export class Student {
       id: this.props.id,
       userId: this.props.userId,
       dateOfBirth: this.props.dateOfBirth.value,
-      lat: this.props.collectionPoint.value.lat,
-      long: this.props.collectionPoint.value.long,
+      lat: this.props.coordinates.value.lat,
+      long: this.props.coordinates.value.long,
       vanId: this.props.vanId,
     };
   }
@@ -123,7 +121,7 @@ export class Student {
       id: props.id,
       userId: props.userId,
       dateOfBirth: DateOfBirth.restore(props.dateOfBirth),
-      collectionPoint: CollectionPoint.restore({
+      coordinates: Coordinates.restore({
         lat: props.lat,
         long: props.long,
       }),

@@ -1,6 +1,6 @@
-import { InvalidCollectionPointError } from "../../domain/entities/student/errors/InvalidCollectionPointError.js";
+import { InvalidCoordinatesError } from "../../domain/shared/errors/InvalidCoordinatesError.js";
 import type { Student } from "../../domain/entities/student/Student.js";
-import { CollectionPoint } from "../../domain/entities/student/valueObjects/CollectionPoint.js";
+import { Coordinates } from "../../domain/shared/valueObjects/Coordinates.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
 import { InvalidDateOfBirthError } from "../../domain/shared/errors/InvalidDateOfBirthError.js";
@@ -13,17 +13,17 @@ export type UpdateStudentInputDto = {
   studentId: string;
   requesterId: string;
   dateOfBirth: string;
-  collectionPoint: { lat: number; long: number };
+  coordinates: { lat: number; long: number };
 };
 
 export type UpdateStudentOutputDto = {
   id: string;
-  collectionPoint: { lat: number; long: number };
+  coordinates: { lat: number; long: number };
 };
 
 export type UpdateStudentError =
   | StudentNotFoundError
-  | InvalidCollectionPointError
+  | InvalidCoordinatesError
   | InvalidDateOfBirthError
   | NotStudentOwnerError;
 
@@ -53,16 +53,14 @@ export class UpdateStudentUseCase implements UseCase<
       return left(dateOfBirthOrError.value);
     }
 
-    const collectionPointOrError = CollectionPoint.create(
-      input.collectionPoint,
-    );
-    if (collectionPointOrError.isLeft()) {
-      return left(collectionPointOrError.value);
+    const coordinatesOrError = Coordinates.create(input.coordinates);
+    if (coordinatesOrError.isLeft()) {
+      return left(coordinatesOrError.value);
     }
 
     const updatedStudent = student.withUpdatedDetails({
       dateOfBirth: dateOfBirthOrError.value,
-      collectionPoint: collectionPointOrError.value,
+      coordinates: coordinatesOrError.value,
     });
 
     await this.studentRepository.update(updatedStudent);
@@ -70,6 +68,6 @@ export class UpdateStudentUseCase implements UseCase<
     return right(this.presentOutput(updatedStudent));
   }
   private presentOutput(student: Student): UpdateStudentOutputDto {
-    return { id: student.id, collectionPoint: student.collectionPoint.value };
+    return { id: student.id, coordinates: student.coordinates.value };
   }
 }

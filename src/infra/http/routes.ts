@@ -10,6 +10,7 @@ import {
   requireDriver,
   requireSelf,
 } from "./middlewares/authMiddleware.js";
+import type { VanTripController } from "./controllers/VanTripController.js";
 
 export function buildRoutes(
   userController: UserController,
@@ -17,6 +18,7 @@ export function buildRoutes(
   studentController: StudentController,
   driverController: DriverController,
   routeController: RouteController,
+  vanTripController: VanTripController,
   tokenService: ITokenService,
 ): Router {
   const router = Router();
@@ -44,6 +46,24 @@ export function buildRoutes(
   );
   router.get("/vans/driver/:driverId", authenticate, (req, res) =>
     vanController.listByDriver(req, res),
+  );
+  router.post(
+    "/vans/:vanId/trip/start",
+    authenticate,
+    requireDriver,
+    (req, res) => vanTripController.start(req, res),
+  );
+  router.post(
+    "/vans/:vanId/trip/end",
+    authenticate,
+    requireDriver,
+    (req, res) => vanTripController.end(req, res),
+  );
+  router.put("/vans/:vanId/location", authenticate, requireDriver, (req, res) =>
+    vanTripController.updateLocation(req, res),
+  );
+  router.get("/vans/:vanId/location", authenticate, (req, res) =>
+    vanTripController.getLocation(req, res),
   );
 
   // student

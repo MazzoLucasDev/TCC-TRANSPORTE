@@ -20,7 +20,7 @@ export type GetMyStudentProfileOutputDto = {
   studentId: string;
   name: string;
   phone: string;
-  collectionPoint: { lat: number; long: number };
+  coordinates: { lat: number; long: number };
   van: {
     id: string;
     model: string;
@@ -108,7 +108,7 @@ export class GetMyStudentProfileUseCase implements UseCase<
       studentId: student.id,
       name: user.name.value,
       phone: user.phone.value,
-      collectionPoint: student.collectionPoint.value,
+      coordinates: student.coordinates.value,
       van: van
         ? {
             id: van.id,

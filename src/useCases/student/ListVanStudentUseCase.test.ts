@@ -8,7 +8,7 @@ import { Student } from "../../domain/entities/student/Student";
 import { User } from "../../domain/entities/user/User";
 import { Van } from "../../domain/entities/van/Van";
 import { NotVanMemberError } from "../shared/NotVanMemberError";
-import { VanNotFoundError } from "../shared/VanNotFoundError";
+import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError";
 
 describe("ListVanStudentUseCase", () => {
   let studentRepository: IStudentRepository;
@@ -25,7 +25,7 @@ describe("ListVanStudentUseCase", () => {
     const result = Student.create({
       userId,
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (result.isLeft()) throw new Error("Falha ao montar fixture");
     return result.value;
@@ -116,7 +116,7 @@ describe("ListVanStudentUseCase", () => {
       userId: "user-1",
       name: "Ana Aluna",
       phone: "41999999999",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     expect(result.value.students[1]?.name).toBe("Bruno Aluno");
   });

@@ -37,7 +37,7 @@ describe("GetMyStudentProfileUseCase", () => {
     const studentResult = Student.create({
       userId: "user-1",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (studentResult.isLeft()) throw new Error("Falha ao montar fixture");
     student = studentResult.value;
@@ -120,7 +120,7 @@ describe("GetMyStudentProfileUseCase", () => {
 
     expect(result.value.studentId).toBe(student.id);
     expect(result.value.name).toBe("Ana Aluna");
-    expect(result.value.collectionPoint).toEqual({ lat: -25.42, long: -49.27 });
+    expect(result.value.coordinates).toEqual({ lat: -25.42, long: -49.27 });
     expect(result.value.van).toEqual({
       id: van.id,
       model: "Sprinter",
@@ -166,7 +166,7 @@ describe("GetMyStudentProfileUseCase", () => {
     const unlinked = Student.create({
       userId: "user-1",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (unlinked.isLeft()) throw new Error("Falha ao montar fixture");
     studentRepository.findByUserId = vi.fn().mockResolvedValue(unlinked.value);

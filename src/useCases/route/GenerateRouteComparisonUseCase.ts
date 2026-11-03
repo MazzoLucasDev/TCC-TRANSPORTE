@@ -108,8 +108,8 @@ export class GenerateRouteComparisonUseCase implements UseCase<
 
     const confirmedPoints: RoutePoint[] = confirmedStudents.map((student) => ({
       studentId: student.id,
-      lat: student.collectionPoint.value.lat,
-      long: student.collectionPoint.value.long,
+      lat: student.coordinates.value.lat,
+      long: student.coordinates.value.long,
     }));
 
     const parsedDate = new Date(input.date);
@@ -185,8 +185,8 @@ export class GenerateRouteComparisonUseCase implements UseCase<
           {
             studentId: student.id,
             name: user?.name.value ?? "Aluno sem cadastro",
-            lat: student.collectionPoint.value.lat,
-            long: student.collectionPoint.value.long,
+            lat: student.coordinates.value.lat,
+            long: student.coordinates.value.long,
           },
         ];
       }),

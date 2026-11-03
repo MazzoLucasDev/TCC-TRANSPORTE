@@ -26,7 +26,7 @@ describe("ListConfirmedAttendanceUseCase", () => {
     const result = Student.create({
       userId: "user-x",
       dateOfBirth: "2010-03-20",
-      collectionPoint: { lat: -25.42, long: -49.27 },
+      coordinates: { lat: -25.42, long: -49.27 },
     });
     if (result.isLeft()) throw new Error("Falha ao montar fixture");
     return result.value;

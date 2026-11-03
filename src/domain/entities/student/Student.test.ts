@@ -5,7 +5,7 @@ describe("Student", () => {
   const validStudentData = {
     userId: "user-1",
     dateOfBirth: "2010-03-20",
-    collectionPoint: { lat: -25.42, long: -49.27 },
+    coordinates: { lat: -25.42, long: -49.27 },
   };
 
   it("deve criar um aluno válido", () => {
@@ -29,7 +29,7 @@ describe("Student", () => {
   it("deve rejeitar ponto de coleta inválido", () => {
     const result = Student.create({
       ...validStudentData,
-      collectionPoint: { lat: 999, long: -49.27 },
+      coordinates: { lat: 999, long: -49.27 },
     });
     expect(result.isLeft()).toBe(true);
   });

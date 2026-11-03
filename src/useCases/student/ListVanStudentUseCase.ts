@@ -4,7 +4,7 @@ import type { IStudentRepository } from "../../domain/repositories/IStudentRepos
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
-import { VanNotFoundError } from "../shared/VanNotFoundError.js";
+import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
 import type { UseCase } from "../useCase.js";
 import { NotVanMemberError } from "../shared/NotVanMemberError.js";
 
@@ -16,7 +16,7 @@ export type ListVanStudentOutputDto = {
     userId: string;
     name: string;
     phone: string;
-    collectionPoint: { lat: number; long: number };
+    coordinates: { lat: number; long: number };
   }>;
 };
 
@@ -77,7 +77,7 @@ export class ListVanStudentUseCase implements UseCase<
         userId: student.userId,
         name: user?.name.value ?? "Aluno sem cadastro",
         phone: user?.phone.value ?? "",
-        collectionPoint: student.collectionPoint.value,
+        coordinates: student.coordinates.value,
       })),
     };
   }

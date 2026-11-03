@@ -1,7 +1,7 @@
-import { left, right, type Either } from "../../../shared/Either.js";
-import { InvalidCollectionPointError } from "../errors/InvalidCollectionPointError.js";
+import { left, right, type Either } from "../Either.js";
+import { InvalidCoordinatesError } from "../errors/InvalidCoordinatesError.js";
 
-export type CollectionPointData = {
+export type CoordinatesData = {
   lat: number;
   long: number;
 };
@@ -9,7 +9,7 @@ const BRASIL_LAT_MIN = -33.75;
 const BRASIL_LAT_MAX = 5.27;
 const BRASIL_LNG_MIN = -73.99;
 const BRASIL_LNG_MAX = -28.84;
-export class CollectionPoint {
+export class Coordinates {
   private constructor(
     private readonly lat: number,
     private readonly long: number,
@@ -18,14 +18,14 @@ export class CollectionPoint {
   }
 
   static create(
-    data: CollectionPointData,
-  ): Either<InvalidCollectionPointError, CollectionPoint> {
-    if (!CollectionPoint.validate(data)) {
-      return left(new InvalidCollectionPointError(data.lat, data.long));
+    data: CoordinatesData,
+  ): Either<InvalidCoordinatesError, Coordinates> {
+    if (!Coordinates.validate(data)) {
+      return left(new InvalidCoordinatesError(data.lat, data.long));
     }
-    return right(new CollectionPoint(data.lat, data.long));
+    return right(new Coordinates(data.lat, data.long));
   }
-  static validate(data: CollectionPointData): boolean {
+  static validate(data: CoordinatesData): boolean {
     const { lat, long } = data;
     if (typeof lat !== "number" || typeof long !== "number") {
       return false;
@@ -42,11 +42,11 @@ export class CollectionPoint {
     return true;
   }
 
-  static restore(data: CollectionPointData): CollectionPoint {
-    return new CollectionPoint(data.lat, data.long);
+  static restore(data: CoordinatesData): Coordinates {
+    return new Coordinates(data.lat, data.long);
   }
 
-  get value(): CollectionPointData {
+  get value(): CoordinatesData {
     return { lat: this.lat, long: this.long };
   }
 }

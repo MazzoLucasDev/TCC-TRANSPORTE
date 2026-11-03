@@ -56,6 +56,12 @@ import { OsrmRouteCalculatorService } from "../infra/services/OsrmRouteCalculato
 import { GetStudentSummaryUseCase } from "../useCases/student/GetStudentSummaryUseCase.js";
 import { GetMyStudentProfileUseCase } from "../useCases/student/GetMyStudentProfileUseCase.js";
 import { RegisterPresenceUseCase } from "../useCases/student/RegisterPresenceUseCase.js";
+import { InMemoryVanLocationRepository } from "../infra/repositories/InMemoryVanLocationRepository.js";
+import { StartVanTripUseCase } from "../useCases/van/StartVanTripUseCase.js";
+import { EndVanTripUseCase } from "../useCases/van/EndVanTripUseCase.js";
+import { UpdateVanLocationUseCase } from "../useCases/van/UpdateVanLocationUseCase.js";
+import { GetVanLocationUseCase } from "../useCases/van/GetVanLocationUseCase.js";
+import { VanTripController } from "../infra/http/controllers/VanTripController.js";
 
 function assertEnv(name: string): string {
   const value = process.env[name];
@@ -73,6 +79,7 @@ function bootstrap() {
   const studentRepository = new PrismaStudentRepository();
   const attendanceRepository = new PrismaAttendanceRepository();
   const routeRepository = new PrismaRouteRepository();
+  const vanLocationRepository = new InMemoryVanLocationRepository();
 
   // Serviços
   const passwordHasher = new BcryptPasswordHasher();
@@ -112,6 +119,17 @@ function bootstrap() {
     vanRepository,
     studentRepository,
     routeRepository,
+  );
+
+  const vanTripController = new VanTripController(
+    StartVanTripUseCase.create(vanRepository),
+    EndVanTripUseCase.create(vanRepository, vanLocationRepository),
+    UpdateVanLocationUseCase.create(vanRepository, vanLocationRepository),
+    GetVanLocationUseCase.create(
+      vanRepository,
+      studentRepository,
+      vanLocationRepository,
+    ),
   );
 
   // Use Cases - Student
@@ -216,6 +234,7 @@ function bootstrap() {
     studentController,
     driverController,
     routeController,
+    vanTripController,
     tokenService,
   );
   app.use("/api", routes);
