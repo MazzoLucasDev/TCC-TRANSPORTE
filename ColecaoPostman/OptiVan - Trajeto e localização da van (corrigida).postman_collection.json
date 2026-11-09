@@ -1,0 +1,1380 @@
+{
+  "info": {
+    "_postman_id": "0976cdf7-bd6d-4ea6-b1cc-4ea8f918e8a8",
+    "name": "OptiVan - Trajeto e localização da van",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48182879",
+    "_collection_link": "https://go.postman.co/collection/48182879-0976cdf7-bd6d-4ea6-b1cc-4ea8f918e8a8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "0. Autenticação",
+      "item": [
+        {
+          "name": "Login motorista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Devolve token e usuário\", () => { pm.expect(body.token).to.be.a(\"string\"); pm.expect(body.user.id).to.be.a(\"string\"); });",
+                  "pm.collectionVariables.set(\"tokenMotorista\", body.token);",
+                  "pm.collectionVariables.set(\"motoristaId\", body.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{driverEmail}}\",\n  \"password\": \"{{driverPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login aluno da van",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Devolve token e usuário\", () => { pm.expect(body.token).to.be.a(\"string\"); pm.expect(body.user.id).to.be.a(\"string\"); });",
+                  "pm.collectionVariables.set(\"tokenAluno\", body.token);",
+                  "pm.collectionVariables.set(\"alunoId\", body.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login outro motorista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Devolve token e usuário\", () => { pm.expect(body.token).to.be.a(\"string\"); pm.expect(body.user.id).to.be.a(\"string\"); });",
+                  "pm.collectionVariables.set(\"tokenOutroMotorista\", body.token);",
+                  "pm.collectionVariables.set(\"outroMotoristaId\", body.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{otherDriverEmail}}\",\n  \"password\": \"{{otherDriverPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login aluno de outra van",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Devolve token e usuário\", () => { pm.expect(body.token).to.be.a(\"string\"); pm.expect(body.user.id).to.be.a(\"string\"); });",
+                  "pm.collectionVariables.set(\"tokenOutroAluno\", body.token);",
+                  "pm.collectionVariables.set(\"outroAlunoId\", body.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{otherStudentEmail}}\",\n  \"password\": \"{{otherStudentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Alunos de hoje",
+      "item": [
+        {
+          "name": "Motorista lista alunos confirmados",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista dono recebe 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Devolve a lista de alunos confirmados\", () => pm.expect(pm.response.json().confirmedStudents).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/confirmed?vanId={{vanId}}&date={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "confirmed"
+              ],
+              "query": [
+                {
+                  "key": "vanId",
+                  "value": "{{vanId}}"
+                },
+                {
+                  "key": "date",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno não acessa a lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Aluno é bloqueado (401/403)\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/confirmed?vanId={{vanId}}&date={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "confirmed"
+              ],
+              "query": [
+                {
+                  "key": "vanId",
+                  "value": "{{vanId}}"
+                },
+                {
+                  "key": "date",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Outro motorista não acessa a lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista que não é dono é bloqueado (401/403)\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/confirmed?vanId={{vanId}}&date={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "confirmed"
+              ],
+              "query": [
+                {
+                  "key": "vanId",
+                  "value": "{{vanId}}"
+                },
+                {
+                  "key": "date",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Antes do trajeto",
+      "item": [
+        {
+          "name": "Enviar posição sem trajeto iniciado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rejeita com 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensagem de erro presente\", () => pm.expect(pm.response.json().error).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno consulta: van parada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"emTrajeto é false\", () => pm.expect(body.emTrajeto).to.eql(false));",
+                  "pm.test(\"location é null\", () => pm.expect(body.location).to.eql(null));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Iniciar trajeto",
+      "item": [
+        {
+          "name": "Sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Sem token retorna 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno não inicia trajeto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Aluno é bloqueado (401/403)\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Outro motorista não inicia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista que não é dono recebe 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Motorista dono inicia",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"emTrajeto é true\", () => pm.expect(pm.response.json().emTrajeto).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "start"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Enviar posição",
+      "item": [
+        {
+          "name": "Aluno não envia posição",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Aluno é bloqueado (401/403)\", () => pm.expect(pm.response.code).to.be.oneOf([401, 403]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Outro motorista não envia posição",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista que não é dono recebe 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Coordenada fora do Brasil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rejeita com 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": 48.85,\n  \"long\": 2.35\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Coordenada que não é número",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rejeita com 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": \"abc\",\n  \"long\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Body não sobrescreve o vanId da URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Usa o vanId da URL, não o do body\", () => pm.expect(pm.response.json().vanId).to.eql(pm.variables.get(\"vanId\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vanId\": \"{{otherVanId}}\",\n  \"requesterId\": \"{{outroMotoristaId}}\",\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Motorista envia posição válida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"Devolve a posição e o horário\", () => { pm.expect(body.lat).to.eql(-25.42); pm.expect(body.long).to.eql(-49.27); pm.expect(new Date(body.updatedAt).toString()).to.not.eql(\"Invalid Date\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Consultar posição",
+      "item": [
+        {
+          "name": "Sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Sem token retorna 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno da van consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"emTrajeto é true\", () => pm.expect(body.emTrajeto).to.eql(true));",
+                  "pm.test(\"Posição recente (stale = false)\", () => { pm.expect(body.location.stale).to.eql(false); pm.expect(body.location.lat).to.eql(-25.42); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Motorista dono consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno de outra van não consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Aluno de outra van recebe 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Outro motorista não consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista que não é dono recebe 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Sem sinal (aguarda 31 s)",
+      "item": [
+        {
+          "name": "Aluno consulta após 31 s sem envio",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// aguarda mais que o limite de 30 s para a posição ficar desatualizada",
+                  "setTimeout(function () {}, 31000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Posição marcada como desatualizada (stale = true)\", () => pm.expect(pm.response.json().location.stale).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Encerrar trajeto",
+      "item": [
+        {
+          "name": "Outro motorista não encerra",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Motorista que não é dono recebe 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenOutroMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "end"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Motorista dono encerra",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"emTrajeto é false\", () => pm.expect(pm.response.json().emTrajeto).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/trip/end",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "trip",
+                "end"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aluno consulta: sem posição",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"emTrajeto é false e location é null\", () => { pm.expect(body.emTrajeto).to.eql(false); pm.expect(body.location).to.eql(null); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAluno}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar posição após encerrar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Rejeita com 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenMotorista}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lat\": -25.42,\n  \"long\": -49.27\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vans/{{vanId}}/location",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vans",
+                "{{vanId}}",
+                "location"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "tokenMotorista",
+      "value": ""
+    },
+    {
+      "key": "tokenAluno",
+      "value": ""
+    },
+    {
+      "key": "tokenOutroMotorista",
+      "value": ""
+    },
+    {
+      "key": "tokenOutroAluno",
+      "value": ""
+    },
+    {
+      "key": "motoristaId",
+      "value": ""
+    },
+    {
+      "key": "alunoId",
+      "value": ""
+    },
+    {
+      "key": "outroMotoristaId",
+      "value": ""
+    },
+    {
+      "key": "outroAlunoId",
+      "value": ""
+    },
+    {
+      "key": "today",
+      "value": ""
+    }
+  ]
+}

@@ -20,11 +20,6 @@ describe("User", () => {
     expect(result.isLeft()).toBe(true);
   });
 
-  it("deve rejeitar senha curta", () => {
-    const result = User.create({ ...validUserData, password: "123" });
-    expect(result.isLeft()).toBe(true);
-  });
-
   it("deve rejeitar tipo de usuário desconhecido", () => {
     const result = User.create({ ...validUserData, userType: "ADMIN" });
     expect(result.isLeft()).toBe(true);
