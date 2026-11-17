@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GenerateRouteComparisonUseCase } from "./GenerateRouteComparisonUseCase.js";
-import { HaversineRouteCalculatorService } from "../../infra/services/HaversineRouteCalculatorService.js";
 import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";
 import type { IStudentRepository } from "../../domain/repositories/IStudentRepository.js";
 import type { IAttendanceRepository } from "../../domain/repositories/IAttendanceRepository.js";
 import type { IRouteRepository } from "../../domain/repositories/IRouteRepository.js";
-import type { IRouteCalculatorService } from "../../domain/services/IRouteCalculatorService.js";
+import type {
+  GeoPoint,
+  IRouteCalculatorService,
+  RoutePoint,
+} from "../../domain/services/IRouteCalculatorService.js";
 import { Van } from "../../domain/entities/van/Van.js";
 import { Student } from "../../domain/entities/student/Student.js";
 import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
@@ -18,12 +21,39 @@ describe("GenerateRouteComparisonUseCase", () => {
   let attendanceRepository: IAttendanceRepository;
   let routeRepository: IRouteRepository;
   let userRepository: IUserRepository;
+  let fakeCalculator: IRouteCalculatorService;
   let sut: GenerateRouteComparisonUseCase;
   let van: Van;
 
   // Pontos reais em Curitiba, com distância crescente a partir da origem,
-  // para conseguir prever a ordem esperada do Nearest Neighbor
+  // para conseguir prever a ordem esperada do vizinho mais próximo
   const origin = { lat: -25.4284, long: -49.2733 }; // Centro de Curitiba
+
+  // Calculador falso e determinístico, para o teste não depender de infra:
+  // as distâncias são euclidianas sobre as coordenadas, o que basta para
+  // prever a ordem do vizinho mais próximo. O traçado é a lista de pontos.
+  const distanceBetween = (a: GeoPoint, b: GeoPoint) =>
+    Math.hypot(a.lat - b.lat, a.long - b.long);
+
+  const buildFakeCalculator = (): IRouteCalculatorService => ({
+    getDistanceMatrix: vi.fn(async (from: GeoPoint, points: RoutePoint[]) => {
+      const all = [from, ...points];
+      return all.map((a) => all.map((b) => distanceBetween(a, b)));
+    }),
+    calculateRoute: vi.fn(async (from: GeoPoint, points: RoutePoint[]) => {
+      const path = [from, ...points.map(({ lat, long }) => ({ lat, long }))];
+      let distanceKm = 0;
+      for (let i = 1; i < path.length; i++) {
+        distanceKm += distanceBetween(path[i - 1]!, path[i]!);
+      }
+      return {
+        distanceKm,
+        durationMin: distanceKm * 2,
+        geometry: path,
+        approximate: true,
+      };
+    }),
+  });
 
   const buildStudentAt = (lat: number, long: number) => {
     const result = Student.create({
@@ -46,6 +76,8 @@ describe("GenerateRouteComparisonUseCase", () => {
     });
     if (vanResult.isLeft()) throw new Error("Falha ao montar van");
     van = vanResult.value;
+
+    fakeCalculator = buildFakeCalculator();
 
     vanRepository = {
       findById: vi.fn().mockResolvedValue(van),
@@ -108,7 +140,7 @@ describe("GenerateRouteComparisonUseCase", () => {
       studentRepository,
       attendanceRepository,
       routeRepository,
-      new HaversineRouteCalculatorService(),
+      fakeCalculator,
       userRepository,
     );
   });
@@ -139,9 +171,9 @@ describe("GenerateRouteComparisonUseCase", () => {
     expect(result.isLeft()).toBe(true);
   });
 
-  it("deve gerar a rota simples mantendo a ordem de cadastro", async () => {
-    const studentFar = buildStudentAt(-25.45, -49.3); // mais distante
-    const studentNear = buildStudentAt(-25.43, -49.275); // mais próximo
+  it("deve montar a rota simples com os alunos na ordem de cadastro", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
 
     // cadastro na ordem: distante primeiro, próximo depois
     studentRepository.listByVanId = vi
@@ -155,9 +187,12 @@ describe("GenerateRouteComparisonUseCase", () => {
       driverLocation: origin,
     });
 
+    expect(fakeCalculator.calculateRoute).toHaveBeenCalledWith(origin, [
+      { studentId: studentFar.id, lat: -25.45, long: -49.3 },
+      { studentId: studentNear.id, lat: -25.43, long: -49.275 },
+    ]);
     expect(result.isRight()).toBe(true);
     if (result.isRight()) {
-      // rota simples preserva a ordem de entrada, mesmo não sendo a mais eficiente
       expect(result.value.simpleRoute.studentOrder).toEqual([
         studentFar.id,
         studentNear.id,
@@ -165,11 +200,10 @@ describe("GenerateRouteComparisonUseCase", () => {
     }
   });
 
-  it("deve gerar a rota otimizada visitando sempre o mais próximo primeiro", async () => {
-    const studentFar = buildStudentAt(-25.45, -49.3); // mais distante da origem
-    const studentNear = buildStudentAt(-25.43, -49.275); // mais próximo da origem
+  it("deve ordenar a rota otimizada visitando sempre o aluno mais próximo primeiro", async () => {
+    const studentFar = buildStudentAt(-25.45, -49.3);
+    const studentNear = buildStudentAt(-25.43, -49.275);
 
-    // mesma entrada de antes: distante primeiro na lista, próximo depois
     studentRepository.listByVanId = vi
       .fn()
       .mockResolvedValue([studentFar, studentNear]);
@@ -181,9 +215,14 @@ describe("GenerateRouteComparisonUseCase", () => {
       driverLocation: origin,
     });
 
+    // as distâncias vêm do calculador, que recebe a origem e os alunos em ordem de cadastro
+    expect(fakeCalculator.getDistanceMatrix).toHaveBeenCalledWith(origin, [
+      { studentId: studentFar.id, lat: -25.45, long: -49.3 },
+      { studentId: studentNear.id, lat: -25.43, long: -49.275 },
+    ]);
     expect(result.isRight()).toBe(true);
     if (result.isRight()) {
-      // rota otimizada corrige a ordem: visita o mais próximo primeiro, mesmo entrando depois na lista
+      // a ordem é decidida pelo caso de uso: o aluno próximo vem antes
       expect(result.value.optimizedRoute.studentOrder).toEqual([
         studentNear.id,
         studentFar.id,
@@ -326,7 +365,7 @@ describe("GenerateRouteComparisonUseCase", () => {
         { lat: -25.43, long: -49.275 },
         { lat: -25.45, long: -49.3 },
       ]);
-      // o calculador Haversine só consegue traçar linha reta
+      // o indicador de aproximação é o informado pelo calculador
       expect(simpleRoute.approximate).toBe(true);
       expect(optimizedRoute.approximate).toBe(true);
     }
@@ -394,8 +433,7 @@ describe("GenerateRouteComparisonUseCase", () => {
       .fn()
       .mockResolvedValue([studentFar, studentNear]);
 
-    const fake = {
-      order: [studentFar.id],
+    const metrics = {
       distanceKm: 1.5,
       durationMin: 4,
       geometry: [
@@ -406,8 +444,11 @@ describe("GenerateRouteComparisonUseCase", () => {
       approximate: false,
     };
     const calculator: IRouteCalculatorService = {
-      calculateFixedOrder: vi.fn().mockResolvedValue(fake),
-      calculateOptimized: vi.fn().mockResolvedValue(fake),
+      getDistanceMatrix: vi.fn().mockResolvedValue([
+        [0, 1],
+        [1, 0],
+      ]),
+      calculateRoute: vi.fn().mockResolvedValue(metrics),
     };
     sut = GenerateRouteComparisonUseCase.create(
       vanRepository,
@@ -429,17 +470,18 @@ describe("GenerateRouteComparisonUseCase", () => {
     const expectedPoints = [
       { studentId: studentFar.id, lat: -25.45, long: -49.3 },
     ];
-    expect(calculator.calculateFixedOrder).toHaveBeenCalledWith(
+    expect(calculator.getDistanceMatrix).toHaveBeenCalledWith(
       origin,
       expectedPoints,
     );
-    expect(calculator.calculateOptimized).toHaveBeenCalledWith(
+    expect(calculator.calculateRoute).toHaveBeenCalledWith(
       origin,
       expectedPoints,
     );
     expect(result.isRight()).toBe(true);
     if (result.isRight()) {
-      expect(result.value.optimizedRoute.geometry).toEqual(fake.geometry);
+      expect(result.value.optimizedRoute.geometry).toEqual(metrics.geometry);
+      expect(result.value.optimizedRoute.distanceKm).toBe(1.5);
       expect(result.value.optimizedRoute.approximate).toBe(false);
     }
   });

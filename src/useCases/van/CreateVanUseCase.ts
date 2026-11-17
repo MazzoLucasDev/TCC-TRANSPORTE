@@ -1,4 +1,3 @@
-import { stringify } from "node:querystring";
 import { Van, type VanError } from "../../domain/entities/van/Van.js";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";

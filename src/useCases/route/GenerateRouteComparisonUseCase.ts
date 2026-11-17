@@ -6,10 +6,12 @@ import type { IStudentRepository } from "../../domain/repositories/IStudentRepos
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { IVanRepository } from "../../domain/repositories/IVanRepository.js";
 import type {
+  GeoPoint,
   IRouteCalculatorService,
-  RouteCalculatorResult,
+  RouteMetrics,
   RoutePoint,
 } from "../../domain/services/IRouteCalculatorService.js";
+import { orderByNearestNeighbor } from "../../domain/services/orderByNearestNeighbor.js";
 import { left, right, type Either } from "../../domain/shared/Either.js";
 import { VanNotFoundError } from "../../domain/shared/errors/VanNotFoundError.js";
 import { NotVanOwnerError } from "../shared/NotVanOwnerError.js";
@@ -45,6 +47,9 @@ export type GenerateRouteComparisonUseCaseOutputDto = {
   simpleRoute: RouteResultDto;
   optimizedRoute: RouteResultDto;
 };
+
+// Percurso calculado: a ordem dos alunos decidida pelo caso de uso e as medidas do serviço.
+type CalculatedRoute = RouteMetrics & { order: string[] };
 
 export type GenerateRouteComparisonError =
   | VanNotFoundError
@@ -114,14 +119,27 @@ export class GenerateRouteComparisonUseCase implements UseCase<
 
     const parsedDate = new Date(input.date);
 
-    const simpleResult = await this.routeCalculator.calculateFixedOrder(
+    // Rota simples: visita os alunos na ordem de cadastro.
+    const simpleResult = await this.buildRoute(
       input.driverLocation,
       confirmedPoints,
     );
 
-    const optimizedResult = await this.routeCalculator.calculateOptimized(
+    // Rota otimizada: a ordem vem da heurística do vizinho mais próximo,
+    // aplicada sobre as distâncias fornecidas pelo serviço.
+    const distances = await this.routeCalculator.getDistanceMatrix(
       input.driverLocation,
       confirmedPoints,
+    );
+    const optimizedPoints = orderByNearestNeighbor(distances).flatMap(
+      (index) => {
+        const point = confirmedPoints[index - 1];
+        return point ? [point] : [];
+      },
+    );
+    const optimizedResult = await this.buildRoute(
+      input.driverLocation,
+      optimizedPoints,
     );
 
     const simpleRouteOrError = Route.create({
@@ -153,6 +171,17 @@ export class GenerateRouteComparisonUseCase implements UseCase<
     const stopsById = await this.buildStopsById(confirmedStudents);
 
     return right(this.presentOutput(simpleResult, optimizedResult, stopsById));
+  }
+
+  private async buildRoute(
+    origin: GeoPoint,
+    orderedPoints: RoutePoint[],
+  ): Promise<CalculatedRoute> {
+    const metrics = await this.routeCalculator.calculateRoute(
+      origin,
+      orderedPoints,
+    );
+    return { order: orderedPoints.map((point) => point.studentId), ...metrics };
   }
 
   private async getConfirmedStudents(
@@ -195,11 +224,11 @@ export class GenerateRouteComparisonUseCase implements UseCase<
   }
 
   private presentOutput(
-    simpleResult: RouteCalculatorResult,
-    optimizedResult: RouteCalculatorResult,
+    simpleResult: CalculatedRoute,
+    optimizedResult: CalculatedRoute,
     stopsById: Map<string, RouteStopDto>,
   ): GenerateRouteComparisonUseCaseOutputDto {
-    const toDto = (result: RouteCalculatorResult): RouteResultDto => ({
+    const toDto = (result: CalculatedRoute): RouteResultDto => ({
       studentOrder: result.order,
       stops: result.order.flatMap((id) => {
         const stop = stopsById.get(id);
