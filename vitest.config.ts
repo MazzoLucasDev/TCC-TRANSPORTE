@@ -15,7 +15,7 @@ export default defineConfig({
       exclude: [
         "src/**/*.test.*",
         "src/domain/repositories/**",
-        "src/domain/services/**",
+        "src/domain/services/I*.ts",
         "src/**/*Data.ts",
         "src/useCases/useCase.ts",
         "src/domain/shared/errors/DomainError.ts",
